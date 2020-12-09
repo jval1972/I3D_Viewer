@@ -216,7 +216,7 @@ type
     visible: wordbool;  // Calculated.
     nVerts: word;
     flags: LongWord;    // May indicate, for example, that it's a split.
-    material: O3DM_TMaterial_p; // NULL => not to be drawn.
+    material: integer;  // was O3DM_TMaterial_p; // NULL => not to be drawn.
     tox, toy, tsx, tsy, ta: integer; // Texture data.
     back, front: O3DM_TFace_p;  // BSP links, or doubly linked list
                                 // of regular faces in the BSP leaf.
