@@ -438,7 +438,7 @@ procedure TForm1.Idle(Sender: TObject; var Done: Boolean);
 begin
   if closing then
     Exit;
-    
+
   UpdateEnable;
 
   Done := False;
@@ -574,6 +574,7 @@ begin
     finally
       glEndScene(dc);
     end;
+    glneedsupdate := false;
   end;
 end;
 
