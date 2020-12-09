@@ -31,7 +31,10 @@ interface
 
 uses
   SysUtils;
-  
+
+const
+  ID3_MAGIC = $443342; // "B3D"
+
 // ----------------------------- OBJECT3D.H ---------------------------
 // For use with Watcom C.
 // (C) Copyright 1995 by Jare & JCAB of Iguana.
@@ -204,11 +207,13 @@ type
   O3DM_TFaceVertex_p = ^O3DM_TFaceVertex;
   O3DM_TFaceVertexArray = packed array[0..$FFF] of O3DM_TFaceVertex;
   PO3DM_TFaceVertexArray = ^O3DM_TFaceVertexArray;
+  O3DM_PFaceVertexArray = packed array[0..$FFF] of O3DM_TFaceVertex_p;
+  PO3DM_PFaceVertexArray = ^O3DM_PFaceVertexArray;
 
   O3DM_TFace_p = ^O3DM_TFace;
 
   O3DM_TFaceHeader = packed record
-    visible: boolean;   // Calculated.
+    visible: wordbool;  // Calculated.
     nVerts: word;
     flags: LongWord;    // May indicate, for example, that it's a split.
     material: O3DM_TMaterial_p; // NULL => not to be drawn.
@@ -223,11 +228,14 @@ type
   PO3DM_TFaceHeaderArray = ^O3DM_TFaceHeaderArray;
 
   O3DM_TFace = packed record
-    h: O3DM_TFaceHeader;
-    verts: packed array[0..0] of O3DM_TFaceVertex;
+    h: O3DM_TFaceHeader_p;
+    verts: PO3DM_TFaceVertexArray;
   end;
   O3DM_TFaceArray = packed array[0..$FFF] of O3DM_TFace;
   PO3DM_TFaceArray = ^O3DM_TFaceArray;
+  O3DM_PFaceArray = packed array[0..$FFF] of O3DM_TFace_p;
+  PO3DM_PFaceArray = ^O3DM_PFaceArray;
+
 
   O3DM_TObject = packed record
     nVerts: word;        // Are rotated and translated.
@@ -240,7 +248,7 @@ type
     flags: word;
     verts: PO3DM_TVertexArray;
     normals: PO3DM_TNormalArray;
-    faces: PO3DM_TFaceArray;
+    facecache: PByteArray;
     materials: PO3DM_TMaterialArray;
   end;
   O3DM_TObject_p = ^O3DM_TObject;
