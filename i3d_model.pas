@@ -50,7 +50,8 @@ type
 implementation
 
 uses
-  dglOpenGL;
+  dglOpenGL,
+  i3d_palette;
 
 constructor TI3DModel.Create;
 begin
@@ -196,6 +197,17 @@ function TI3DModel.RenderGL(const scale: single): integer;
 var
   i, j: integer;
 
+  procedure _glcolor(const m: O3DM_TMaterial_p);
+  var
+    cl: i3dcolor3f_t;
+  begin
+    cl := I3DPalColor3f(m.color);
+    if m.flags and O3DMF_TRANS <> 0 then
+      glColor4f(cl.r, cl.g, cl.b, 0.5)
+    else
+      glColor4f(cl.r, cl.g, cl.b, 1.0);
+  end;
+
   procedure _glvertex(const x, y, z: integer);
   begin
     glVertex3f(x * scale, y * scale, z * scale);
@@ -212,6 +224,7 @@ begin
 
     glBegin(GL_TRIANGLE_FAN);
 
+    _glcolor(objfaces[i].h.material);
     for j := 0 to objfaces[i].h.nVerts - 1 do
     begin
       _glvertex(objfaces[i].verts[j].vert.x, objfaces[i].verts[j].vert.y, objfaces[i].verts[j].vert.z);

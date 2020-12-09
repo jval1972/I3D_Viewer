@@ -41,6 +41,7 @@ function I3DPalColor3f(const idx: byte): i3dcolor3f_t;
 
 implementation
 
+const
  RawPalette: array[0..767] of Byte = (
     $00, $00, $00, $00, $3F, $00, $00, $3F, $00, $00, $3F, $00, $00, $3F, $00,
     $00, $3F, $00, $00, $3F, $00, $00, $3F, $00, $00, $3F, $00, $00, $3F, $00,
@@ -98,9 +99,9 @@ implementation
 
 function I3DPalColor3f(const idx: byte): i3dcolor3f_t;
 begin
-  Result.r := RawPalette[3 * idx + 2] / 64;
+  Result.b := RawPalette[3 * idx + 2] / 64;
   Result.g := RawPalette[3 * idx + 1] / 64;
-  Result.b := RawPalette[3 * idx + 0] / 64;
+  Result.r := RawPalette[3 * idx + 0] / 64;
 end;
 
 end.
