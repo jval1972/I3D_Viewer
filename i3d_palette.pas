@@ -39,6 +39,8 @@ type
 
 function I3DPalColor3f(const idx: byte): i3dcolor3f_t;
 
+function I3DPalColorL(const idx: byte): LongWord;
+
 implementation
 
 const
@@ -99,9 +101,17 @@ const
 
 function I3DPalColor3f(const idx: byte): i3dcolor3f_t;
 begin
-  Result.b := RawPalette[3 * idx + 2] / 64;
+  Result.r := RawPalette[3 * idx + 2] / 64;
   Result.g := RawPalette[3 * idx + 1] / 64;
-  Result.r := RawPalette[3 * idx + 0] / 64;
+  Result.b := RawPalette[3 * idx + 0] / 64;
 end;
+
+function I3DPalColorL(const idx: byte): LongWord;
+begin
+  Result :=
+    (RawPalette[3 * idx + 2] * 4 + 2) shl 16 +
+    (RawPalette[3 * idx + 1] * 4 + 2) shl 8 +
+    (RawPalette[3 * idx + 0] * 4 + 2);
+end;  
 
 end.

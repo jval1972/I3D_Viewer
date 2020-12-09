@@ -328,8 +328,6 @@ begin
   wglMakeCurrent(0, 0);
   wglDeleteContext(rc);
 
-  glDeleteTextures(1, @texture1);
-
   stringtobigstring(filemenuhistory.PathStringIdx(0), @opt_filemenuhistory0);
   stringtobigstring(filemenuhistory.PathStringIdx(1), @opt_filemenuhistory1);
   stringtobigstring(filemenuhistory.PathStringIdx(2), @opt_filemenuhistory2);

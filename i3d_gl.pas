@@ -61,11 +61,6 @@ var
 var
   i3d_rendredtriangles: integer = 0;
 
-var
-  texture1: TGLuint = 0;
-
-function gld_CreateTexture(const pic: TPicture; const transparent: boolean): TGLUint;
-
 implementation
 
 uses
@@ -264,8 +259,6 @@ begin
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
 
-  glBindTexture(GL_TEXTURE_2D, texture1);
-
   i3d_rendredtriangles := t.RenderGL(0.001);
 
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -287,55 +280,6 @@ begin
   A[0] := A[2];
   A[2] := tmp;
   Result := PLongWord(@A)^;
-end;
-
-function gld_CreateTexture(const pic: TPicture; const transparent: boolean): TGLUint;
-const
-  TEXTDIM = 256;
-var
-  buffer, line: PLongWordArray;
-  bm: TBitmap;
-  i, j: integer;
-  dest: PLongWord;
-begin
-  bm := TBitmap.Create;
-  bm.Width := TEXTDIM;
-  bm.Height := TEXTDIM;
-  bm.PixelFormat := pf32bit;
-  bm.Canvas.StretchDraw(Rect(0, 0, TEXTDIM, TEXTDIM), pic.Graphic);
-
-  GetMem(buffer, TEXTDIM * TEXTDIM * SizeOf(LongWord));
-  dest := @buffer[0];
-  for j := bm.Height - 1 downto 0 do
-  begin
-    line := bm.ScanLine[j];
-    for i := bm.Height - 1 downto 0 do
-    begin
-      dest^ := RGBSwap(line[i]);
-      inc(dest);
-    end;
-  end;
-  bm.Free;
-
-  if transparent then
-    for i := 0 to TEXTDIM * TEXTDIM - 1 do
-      if buffer[i] and $FFFFFF = 0 then
-        buffer[i] := 0
-      else
-        buffer[i] := buffer[i] or $FF000000;
-
-  glGenTextures(1, @Result);
-  glBindTexture(GL_TEXTURE_2D, Result);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
-               TEXTDIM, TEXTDIM,
-               0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-  FreeMem(buffer, TEXTDIM * TEXTDIM * SizeOf(LongWord));
 end;
 
 end.

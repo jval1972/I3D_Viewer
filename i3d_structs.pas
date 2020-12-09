@@ -170,7 +170,7 @@ type
     color: byte;
     flags: word;          // Semi-transparent? Translucid? etc.
     ambient: integer;     // Lighting parameters.
-    diffuse: integer;
+    texid: integer; // was diffuse
     reflected: integer;
     texname: packed array[0..7] of char;  // Filename of the texture, or "" for flat.
     texture: PByteArray;  // Pointer to loaded texture mem.

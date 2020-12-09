@@ -30,7 +30,9 @@ unit i3d_model;
 interface
 
 uses
-  SysUtils, Classes, i3d_structs;
+  SysUtils,
+  Classes,
+  i3d_structs;
 
 type
   TI3DModel = class(TObject)
@@ -38,12 +40,15 @@ type
     obj: O3DM_TObject_p;
     objfaces: PO3DM_TFaceArray;
     objsize: integer;
+    textures: array[0..$FF] of LongWord;
+    numtextures: integer;
   public
     constructor Create; virtual;
     destructor Destroy; override;
     function LoadFromStream(const strm: TStream): boolean;
     function LoadFromFile(const fname: string): boolean;
     procedure Clear;
+    function CreateTexture(const m: O3DM_TMaterial_p): integer;
     function RenderGL(const scale: single): integer;
   end;
 
@@ -58,6 +63,7 @@ begin
   Inherited Create;
   obj := nil;
   objsize := 0;
+  numtextures := 0;
 end;
 
 destructor TI3DModel.Destroy;
@@ -126,25 +132,6 @@ begin
       objfaces[i].h.next := _OF(objfaces[i].h.next);
   end;
 
-(*  pf2 := nil;
-  face := @obj.faces[0];
-
-  while face <> nil do
-  begin
-    if face.h.front <> nil then
-      face.h.front := _OF(face.h.front);
-    pf2 := face.h.front;
-    for i := 0 to face.h.nVerts - 1 do
-    begin
-      face.verts[i].vert := _OF(face.verts[i].vert);
-      if face.verts[i].normal <> nil then
-        face.verts[i].normal := _OF(face.verts[i].normal);
-    end;
-    if face.h.material <> nil then
-      face.h.material := _OF(face.h.material);
-    face := pf2;
-  end;*)
-
   for i := 0 to obj.nMaterials - 1 do
     if obj.materials[i].texture <> nil then
     begin
@@ -154,12 +141,61 @@ begin
         l := 64 * 64;
       GetMem(obj.materials[i].texture, l);
       if obj.materials[i].texture <> nil then
-        strm.read(obj.materials[i].texture^, 1)
+        strm.read(obj.materials[i].texture^, l)
       else
         strm.Position := strm.Position + 1;
+      CreateTexture(@obj.materials[i]);
     end;
 
   Result := True;
+end;
+
+function TI3DModel.CreateTexture(const m: O3DM_TMaterial_p): integer;
+type
+  TLongWordArrayBuffer = array[0..$3FFF] of LongWord;
+  PLongWordArrayBuffer = ^TLongWordArrayBuffer;
+var
+  buffer: PLongWordArrayBuffer;
+  i: integer;
+  dest: PLongWord;
+  TEXDIMX, TEXDIMY: integer;
+  gltex: LongWord;
+begin
+  if m.flags and O3DMF_256 <> 0 then
+  begin
+    TEXDIMX := 256;
+    TEXDIMY := 64;
+  end
+  else
+  begin
+    TEXDIMX := 64;
+    TEXDIMY := 64;
+  end;
+  GetMem(buffer, TEXDIMX * TEXDIMY * SizeOf(LongWord));
+  dest := @buffer[0];
+  for i := 0 to TEXDIMX * TEXDIMY do
+  begin
+    dest^ := I3DPalColorL(m.texture[i]); // or $FF000000;
+    inc(dest);
+  end;
+
+  glGenTextures(1, @gltex);
+  glBindTexture(GL_TEXTURE_2D, gltex);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8,
+               TEXDIMX, TEXDIMY,
+               0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+  FreeMem(buffer, TEXDIMX * TEXDIMY * SizeOf(LongWord));
+
+  Result := numtextures;
+  m.texid := Result;
+  textures[numtextures] := gltex;
+  inc(numtextures);
 end;
 
 function TI3DModel.LoadFromFile(const fname: string): boolean;
@@ -190,12 +226,16 @@ begin
     FreeMem(obj, objsize);
     obj := nil;
     objsize := 0;
+    for i := 0 to numtextures - 1 do
+      glDeleteTextures(1, @textures[i]);
+    numtextures := 0;
   end;
 end;
 
 function TI3DModel.RenderGL(const scale: single): integer;
 var
   i, j: integer;
+  lasttex, newtex: LongWord;
 
   procedure _glcolor(const m: O3DM_TMaterial_p);
   var
@@ -206,6 +246,11 @@ var
       glColor4f(cl.r, cl.g, cl.b, 0.5)
     else
       glColor4f(cl.r, cl.g, cl.b, 1.0);
+  end;
+
+  procedure _gltexcoord(const tx, ty: integer);
+  begin
+    glTexCoord2f(tx / 262144 / 64, ty / 262144 / 64);
   end;
 
   procedure _glvertex(const x, y, z: integer);
@@ -219,14 +264,24 @@ begin
   if obj = nil then
     exit;
 
+  lasttex := $FFFFFFFF;
+
   for i := 0 to obj.nFaces - 1 do
   begin
 
+    newtex := textures[objfaces[i].h.material.texid];
+    if newtex <> lasttex then
+    begin
+      glBindTexture(GL_TEXTURE_2D, newtex);
+      lasttex := newtex;
+    end;
+
     glBegin(GL_TRIANGLE_FAN);
 
-    _glcolor(objfaces[i].h.material);
+//    _glcolor(objfaces[i].h.material);
     for j := 0 to objfaces[i].h.nVerts - 1 do
     begin
+      _gltexcoord(objfaces[i].verts[j].tx, objfaces[i].verts[j].ty);
       _glvertex(objfaces[i].verts[j].vert.x, objfaces[i].verts[j].vert.y, objfaces[i].verts[j].vert.z);
     end;
 
