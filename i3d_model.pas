@@ -44,9 +44,13 @@ type
     function LoadFromStream(const strm: TStream): boolean;
     function LoadFromFile(const fname: string): boolean;
     procedure Clear;
+    function RenderGL(const scale: single): integer;
   end;
 
 implementation
+
+uses
+  dglOpenGL;
 
 constructor TI3DModel.Create;
 begin
@@ -66,7 +70,6 @@ var
   magic: LongWord;
   base: LongWord;
   i, j, l: integer;
-  face, pf2: O3DM_TFace_p;
   facecachepos: integer;
 
   function _OF(const p: pointer): pointer;
@@ -154,6 +157,8 @@ begin
       else
         strm.Position := strm.Position + 1;
     end;
+
+  Result := True;
 end;
 
 function TI3DModel.LoadFromFile(const fname: string): boolean;
@@ -184,6 +189,37 @@ begin
     FreeMem(obj, objsize);
     obj := nil;
     objsize := 0;
+  end;
+end;
+
+function TI3DModel.RenderGL(const scale: single): integer;
+var
+  i, j: integer;
+
+  procedure _glvertex(const x, y, z: integer);
+  begin
+    glVertex3f(x * scale, y * scale, z * scale);
+  end;
+
+begin
+  Result := 0;
+
+  if obj = nil then
+    exit;
+
+  for i := 0 to obj.nFaces - 1 do
+  begin
+
+    glBegin(GL_TRIANGLE_FAN);
+
+    for j := 0 to objfaces[i].h.nVerts - 1 do
+    begin
+      _glvertex(objfaces[i].verts[j].vert.x, objfaces[i].verts[j].vert.y, objfaces[i].verts[j].vert.z);
+    end;
+
+    glEnd;
+
+    Result := Result + objfaces[i].h.nVerts - 2;
   end;
 end;
 
