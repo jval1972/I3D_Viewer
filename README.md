@@ -16,6 +16,6 @@ Export screenshots to clipboard
 
 ## Screenshots
 
-![Screenshot 1](https://i.postimg.cc/tTwdjwnj/icon.png "icon")
+![Screenshot 1](https://i.postimg.cc/wvZtrw9P/i3dviewer01.png "Screenshot 1")
 
 
