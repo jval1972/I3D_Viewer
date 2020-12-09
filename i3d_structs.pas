@@ -168,9 +168,10 @@ type
 type
   O3DM_TMaterial = packed record
     color: byte;
+    texid: shortint; // JVAL
     flags: word;          // Semi-transparent? Translucid? etc.
     ambient: integer;     // Lighting parameters.
-    texid: integer; // was diffuse
+    diffuse: integer; // was
     reflected: integer;
     texname: packed array[0..7] of char;  // Filename of the texture, or "" for flat.
     texture: PByteArray;  // Pointer to loaded texture mem.
@@ -216,7 +217,7 @@ type
     visible: wordbool;  // Calculated.
     nVerts: word;
     flags: LongWord;    // May indicate, for example, that it's a split.
-    material: integer;  // was O3DM_TMaterial_p; // NULL => not to be drawn.
+    material: O3DM_TMaterial_p; //integer;  // was O3DM_TMaterial_p; // NULL => not to be drawn.
     tox, toy, tsx, tsy, ta: integer; // Texture data.
     back, front: O3DM_TFace_p;  // BSP links, or doubly linked list
                                 // of regular faces in the BSP leaf.

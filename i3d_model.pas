@@ -40,7 +40,7 @@ type
     obj: O3DM_TObject_p;
     objfaces: PO3DM_TFaceArray;
     objsize: integer;
-    textures: array[0..$FF] of LongWord;
+    textures: array[0..$7F] of LongWord;  // texid is shortint (-128..127)
     numtextures: integer;
   public
     constructor Create; virtual;
@@ -124,16 +124,20 @@ begin
       if objfaces[i].verts[j].normal <> nil then
         objfaces[i].verts[j].normal := _OF(objfaces[i].verts[j].normal);
     end;
-    if objfaces[i].h.material = 0 then
+    if objfaces[i].h.material <> nil then
+      objfaces[i].h.material := _OF(objfaces[i].h.material);
+
+{    if objfaces[i].h.material = 0 then
       objfaces[i].h.material := -1
     else
-      objfaces[i].h.material := (objfaces[i].h.material - mpos) div SizeOf(O3DM_TMaterial);
-    if objfaces[i].h.front <> nil then
+      objfaces[i].h.material := (objfaces[i].h.material - mpos) div (1 + SizeOf(O3DM_TMaterial));}
+
+{    if objfaces[i].h.front <> nil then
       objfaces[i].h.front := _OF(objfaces[i].h.front);
     if objfaces[i].h.back <> nil then
       objfaces[i].h.back := _OF(objfaces[i].h.back);
     if objfaces[i].h.next <> nil then
-      objfaces[i].h.next := _OF(objfaces[i].h.next);
+      objfaces[i].h.next := _OF(objfaces[i].h.next);}
   end;
 
   for i := 0 to obj.nMaterials - 1 do
@@ -275,7 +279,36 @@ begin
   for i := 0 to obj.nFaces - 1 do
   begin
 
-    if (objfaces[i].h.material >= 0) and (obj.materials[objfaces[i].h.material].texid >= 0) then
+    if objfaces[i].h.material <> nil then
+    begin
+      newtex := 0;
+      if objfaces[i].h.material.texid >= 0 then
+        newtex := textures[objfaces[i].h.material.texid];
+      if newtex > 0 then
+      begin
+        glEnable(GL_TEXTURE_2D);
+        if newtex <> lasttex then
+        begin
+          glColor4f(1.0, 1.0, 1.0, 1.0);
+          glBindTexture(GL_TEXTURE_2D, newtex);
+          lasttex := newtex;
+        end;
+      end
+      else
+      begin
+        glDisable(GL_TEXTURE_2D);
+        lasttex := 0;
+        _glcolor(objfaces[i].h.material);
+      end;
+    end
+    else
+    begin
+      glDisable(GL_TEXTURE_2D);
+      lasttex := 0;
+      glColor4f(1.0, 1.0, 1.0, 1.0);
+    end;
+
+{    if (objfaces[i].h.material >= 0) and (obj.materials[objfaces[i].h.material].texid >= 0) then
     begin
       glEnable(GL_TEXTURE_2D);
       newtex := textures[obj.materials[objfaces[i].h.material].texid];
@@ -293,7 +326,7 @@ begin
         _glcolor(@obj.materials[objfaces[i].h.material])
       else
         glColor4f(1.0, 1.0, 1.0, 1.0);
-    end;
+    end;}
 
     glBegin(GL_TRIANGLE_FAN);
 
