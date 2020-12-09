@@ -37,7 +37,8 @@ uses
   i3d_filemenuhistory in 'i3d_filemenuhistory.pas',
   i3d_utils in 'i3d_utils.pas',
   i3d_model in 'i3d_model.pas',
-  i3d_structs in 'i3d_structs.pas';
+  i3d_structs in 'i3d_structs.pas',
+  i3d_palette in 'i3d_palette.pas';
 
 {$R *.res}
 
