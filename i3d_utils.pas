@@ -82,6 +82,8 @@ type
     constructor Create(const astring: string);
   end;
 
+procedure splitstring(const inp: string; var out1, out2: string; const splitter: string = ' ');
+
 implementation
 
 uses
@@ -380,6 +382,23 @@ end;
 constructor TString.Create(const astring: string);
 begin
   str := astring;
+end;
+
+procedure splitstring(const inp: string; var out1, out2: string; const splitter: string = ' ');
+var
+  p: integer;
+begin
+  p := Pos(splitter, inp);
+  if p = 0 then
+  begin
+    out1 := inp;
+    out2 := '';
+  end
+  else
+  begin
+    out1 := Trim(Copy(inp, 1, p - 1));
+    out2 := Trim(Copy(inp, p + 1, Length(inp) - p));
+  end;
 end;
 
 end.
