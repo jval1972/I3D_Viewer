@@ -1556,8 +1556,8 @@ object Form1: TForm1
     Top = 89
   end
   object OpenDialog1: TOpenDialog
-    DefaultExt = 'tree'
-    Filter = 'Tree files (*.tree)|*.tree'
+    DefaultExt = 'i3d'
+    Filter = 'I3D Models (*.i3d)|*.i3d'
     Left = 281
     Top = 169
   end
