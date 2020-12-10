@@ -1093,6 +1093,7 @@ object SelectModelForm: TSelectModelForm
       Height = 369
       ItemHeight = 13
       TabOrder = 0
+      OnDblClick = ListBox1DblClick
     end
   end
 end

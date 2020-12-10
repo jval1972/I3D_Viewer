@@ -13,6 +13,7 @@ type
     Button1: TButton;
     Button2: TButton;
     ListBox1: TListBox;
+    procedure ListBox1DblClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -48,6 +49,17 @@ begin
   finally
     f.Free;
   end;
+end;
+
+procedure TSelectModelForm.ListBox1DblClick(Sender: TObject);
+var
+  idx: integer;
+begin
+  idx := ListBox1.ItemIndex;
+  if (idx < 0) or (idx >= ListBox1.Items.Count) then
+    exit;
+
+  Button1.Click;
 end;
 
 end.
