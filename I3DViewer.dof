@@ -125,13 +125,13 @@ Locale=1033
 CodePage=1252
 [Version Info Keys]
 CompanyName=Jim Valavanis
-FileDescription=Procedural Tree Generator
+FileDescription=I3DViewer
 FileVersion=1.0.1.11
-InternalName=ptree
-LegalCopyright=© 2018, jvalavanis@gmail.com
-LegalTrademarks=© 2018, jvalavanis@gmail.com
-OriginalFilename=ptree.exe
-ProductName=Procedural Tree Generator
+InternalName=I3DViewer
+LegalCopyright=© 2020, jvalavanis@gmail.com
+LegalTrademarks=© 2020, jvalavanis@gmail.com
+OriginalFilename=I3DViewer.exe
+ProductName=Speed Haste Model Viewer
 ProductVersion=1.0
 [HistoryLists\hlDebugSourcePath]
 Count=2
