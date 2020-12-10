@@ -78,7 +78,6 @@ var
   base: LongWord;
   i, j, l: integer;
   facecachepos: integer;
-  mpos: LongWord;
 
   function _OF(const p: pointer): pointer;
   begin
@@ -108,7 +107,6 @@ begin
   obj.verts := _OF(obj.verts);
   obj.normals := _OF(obj.normals);
   obj.facecache := _OF(obj.facecache);
-  mpos := LongWord(obj.materials);
   obj.materials := _OF(obj.materials);
 
   GetMem(objfaces, obj.nFaces * SizeOf(O3DM_TFace));
