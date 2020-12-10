@@ -128,7 +128,7 @@ type
     procedure SetFileName(const fname: string; const modelname: string);
     procedure UpdateStausbar;
     procedure UpdateEnable;
-    procedure OnLoadTreeFileMenuHistory(Sender: TObject; const fname: string);
+    procedure OnLoadModelFileMenuHistory(Sender: TObject; const fname: string);
     procedure DoRenderGL;
     procedure Get3dPreviewBitmap(const b: TBitmap);
   public
@@ -176,7 +176,7 @@ begin
   filemenuhistory.MenuItem7 := HistoryItem7;
   filemenuhistory.MenuItem8 := HistoryItem8;
   filemenuhistory.MenuItem9 := HistoryItem9;
-  filemenuhistory.OnOpen := OnLoadTreeFileMenuHistory;
+  filemenuhistory.OnOpen := OnLoadModelFileMenuHistory;
 
   filemenuhistory.AddPath(bigstringtostring(@opt_filemenuhistory9));
   filemenuhistory.AddPath(bigstringtostring(@opt_filemenuhistory8));
@@ -624,7 +624,7 @@ begin
 
 end;
 
-procedure TForm1.OnLoadTreeFileMenuHistory(Sender: TObject; const fname: string);
+procedure TForm1.OnLoadModelFileMenuHistory(Sender: TObject; const fname: string);
 begin
   if not CheckCanClose then
     Exit;
