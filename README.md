@@ -12,7 +12,7 @@ Export screenshots to clipboard
 
 
 ## Downloads
-
+[version 1.0.1.11 (20201210 - win32)](https://sourceforge.net/projects/i3dviewer/files/I3DViewer_1.0/I3DViewer_1.0.1.11_win32.zip/download)
 
 ## Screenshots
 
