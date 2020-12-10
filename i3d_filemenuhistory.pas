@@ -25,7 +25,7 @@
 //  http://www.geocities.ws/jimmyvalavanis/programming/delphi/index.html
 //
 //------------------------------------------------------------------------------
-//  Site  : https://sourceforge.net/projects/speed-game/
+//  Site  : https://sourceforge.net/projects/i3dviewer/
 //------------------------------------------------------------------------------
 
 unit i3d_filemenuhistory;

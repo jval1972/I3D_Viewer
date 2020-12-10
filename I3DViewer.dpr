@@ -22,7 +22,7 @@
 //  OMain Program
 //
 //------------------------------------------------------------------------------
-//  Site  : https://sourceforge.net/projects/speed-game/
+//  Site  : https://sourceforge.net/projects/i3dviewer/
 //------------------------------------------------------------------------------
 
 program I3DViewer;

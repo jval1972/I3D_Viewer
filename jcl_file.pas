@@ -22,7 +22,7 @@
 //  JCL File reader (Speed Haste container file)
 //
 //------------------------------------------------------------------------------
-//  Site  : https://sourceforge.net/projects/speed-game/
+//  Site  : https://sourceforge.net/projects/i3dviewer/
 //------------------------------------------------------------------------------
 
 unit jcl_file;

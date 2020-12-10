@@ -22,7 +22,7 @@
 //  I3D File Structs
 //
 //------------------------------------------------------------------------------
-//  Site  : https://sourceforge.net/projects/speed-game/
+//  Site  : https://sourceforge.net/projects/i3dviewer/
 //------------------------------------------------------------------------------
 
 unit i3d_structs;
