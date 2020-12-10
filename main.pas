@@ -110,6 +110,7 @@ type
   private
     { Private declarations }
     ffilename: string;
+    fjclmodelname: string;
     changed: Boolean;
     rc: HGLRC;   // Rendering Context
     dc: HDC;     // Device Context
@@ -124,7 +125,7 @@ type
     function CheckCanClose: boolean;
     procedure DoNew;
     function DoLoadModel(const fname: string): boolean;
-    procedure SetFileName(const fname: string);
+    procedure SetFileName(const fname: string; const modelname: string);
     procedure UpdateStausbar;
     procedure UpdateEnable;
     procedure OnLoadTreeFileMenuHistory(Sender: TObject; const fname: string);
@@ -142,7 +143,9 @@ implementation
 uses
   i3d_gl,
   i3d_defs,
-  i3d_utils;
+  i3d_utils,
+  jcl_file,
+  frm_selectmodel;
 
 {$R *.dfm}
 
@@ -155,8 +158,9 @@ var
   pf: Integer;
   doCreate: boolean;
 begin
-  Randomize;
-  
+  ffilename := '';
+  fjclmodelname := '';
+
   i3d_LoadSettingFromFile(ChangeFileExt(ParamStr(0), '.ini'));
 
   closing := False;
@@ -236,7 +240,7 @@ begin
 
   if DoCreate then
   begin
-    SetFileName('');
+    SetFileName('', '');
     changed := False;
     glneedsupdate := True;
     needsrecalc := True;
@@ -287,12 +291,19 @@ begin
   ResetCamera;
 end;
 
-procedure TForm1.SetFileName(const fname: string);
+procedure TForm1.SetFileName(const fname: string; const modelname: string);
 begin
   ffilename := fname;
   Caption := rsTitle;
   if ffilename <> '' then
+  begin
     Caption := Caption + ' - ' + MkShortName(ffilename);
+    if modelname <> '' then
+    begin
+      fjclmodelname := modelname;
+      Caption := Caption + ' - [' + fjclmodelname + ']';
+    end;
+  end;
 end;
 
 procedure TForm1.DoNew;
@@ -303,6 +314,13 @@ end;
 function TForm1.DoLoadModel(const fname: string): boolean;
 var
   s: string;
+  jcl: TJCLReader;
+  i: integer;
+  lst: TStringList;
+  p: pointer;
+  psize: integer;
+  m: TMemoryStream;
+  mname: string;
 begin
   if not FileExists(fname) then
   begin
@@ -312,13 +330,75 @@ begin
     Exit;
   end;
 
-  model.LoadFromFile(fname);
+  mname := '';
+  if UpperCase(ExtractFileExt(fname)) = '.JCL' then
+  begin
+    jcl := TJCLReader.Create;
+    jcl.LoadFile(fname);
+    lst := TStringList.Create;
+    for i := 0 to jcl.numlumps - 1 do
+      if UpperCase(ExtractFileExt(getlumpname(jcl.lumps[i]))) = '.I3D' then
+        lst.Add(UpperCase(getlumpname(jcl.lumps[i])));
+    if lst.Count > 0 then
+    begin
+      lst.Sort;
+      mname := fjclmodelname;
+      if SelectModelFromList(lst, mname) then
+      begin
+        if jcl.ReadLump(mname, p, psize) then
+        begin
+          m := TMemoryStream.Create;
+          m.Write(p^, psize);
+          m.Position := 0;
+          Result := model.LoadFromStream(m);
+          FreeMem(p, psize);
+          m.Free;
+          jcl.Free;
+          lst.Free;
+        end
+        else
+        begin
+          jcl.Free;
+          lst.Free;
+          s := Format('Can not read model %s from file %s!', [mname, MkShortName(fname)]);
+          MessageBox(Handle, PChar(s), PChar(rsTitle), MB_OK or MB_ICONEXCLAMATION or MB_APPLMODAL);
+          Result := False;
+          Exit;
+        end;
+      end
+      else // Canceled
+      begin
+        jcl.Free;
+        lst.Free;
+        Result := False;
+        Exit;
+      end;
+    end
+    else
+    begin
+      jcl.Free;
+      lst.Free;
+      s := Format('File %s does not contail any valid models!', [MkShortName(fname)]);
+      MessageBox(Handle, PChar(s), PChar(rsTitle), MB_OK or MB_ICONEXCLAMATION or MB_APPLMODAL);
+      Result := False;
+      Exit;
+    end;
+  end
+  else
+    Result := model.LoadFromFile(fname);
 
-  filemenuhistory.AddPath(fname);
-  SetFileName(fname);
-  glneedsupdate := True;
-  needsrecalc := True;
-  Result := True;
+  if Result then
+  begin
+    filemenuhistory.AddPath(fname);
+    SetFileName(fname, mname);
+    glneedsupdate := True;
+    needsrecalc := True;
+  end
+  else
+  begin
+    s := Format('Error reading model from file %s!', [MkShortName(fname)]);
+    MessageBox(Handle, PChar(s), PChar(rsTitle), MB_OK or MB_ICONEXCLAMATION or MB_APPLMODAL);
+  end;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -564,11 +644,7 @@ begin
   begin
     glBeginScene(OpenGLPanel.Width, OpenGLPanel.Height);
     try
-      if needsrecalc then
-      begin
-//        tree.generate;
-        needsrecalc := False;
-      end;
+      needsrecalc := False;
       glRenderEnviroment;
       glRenderI3D(model);
     finally
@@ -654,7 +730,6 @@ begin
     try
       DoRenderGL;
       Get3dPreviewBitmap(b);
-      Clipboard.Assign(b);
       b.SaveToFile(SavePictureDialog1.FileName);
     finally
       b.Free;

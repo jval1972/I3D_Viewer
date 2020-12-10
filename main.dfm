@@ -1556,8 +1556,8 @@ object Form1: TForm1
     Top = 89
   end
   object OpenDialog1: TOpenDialog
-    DefaultExt = 'i3d'
-    Filter = 'I3D Models (*.i3d)|*.i3d'
+    DefaultExt = 'jcl'
+    Filter = 'JCL data file (*.jcl)|*.jcl|I3D Models (*.i3d)|*.i3d'
     Left = 281
     Top = 169
   end
