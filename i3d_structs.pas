@@ -148,8 +148,8 @@ type
     nFaces: word;
     nFaceVerts: word;
     nMaterials: word;
-        // Object loader can determine the amount of mem to alloc in a
-        // single block, from the nXXX values above -> Less heap overhead.
+    // Object loader can determine the amount of mem to alloc in a
+    // single block, from the nXXX values above -> Less heap overhead.
     flags: word;
     scx, scy, scz: integer;     // Scale factors for the application to handle.
                                 // Recommended format is 16.16.
@@ -168,7 +168,7 @@ type
 type
   O3DM_TMaterial = packed record
     color: byte;
-    texid: shortint; // JVAL
+    texid: shortint; // JVAL: Hack :) - Take advantage of 2 byte ALIGN
     flags: word;          // Semi-transparent? Translucid? etc.
     ambient: integer;     // Lighting parameters.
     diffuse: integer; // was
@@ -217,7 +217,7 @@ type
     visible: wordbool;  // Calculated.
     nVerts: word;
     flags: LongWord;    // May indicate, for example, that it's a split.
-    material: O3DM_TMaterial_p; //integer;  // was O3DM_TMaterial_p; // NULL => not to be drawn.
+    material: O3DM_TMaterial_p; // NULL => not to be drawn.
     tox, toy, tsx, tsy, ta: integer; // Texture data.
     back, front: O3DM_TFace_p;  // BSP links, or doubly linked list
                                 // of regular faces in the BSP leaf.
@@ -256,18 +256,6 @@ type
   O3DM_TObjectArray = packed array[0..$FFF] of O3DM_TObject;
   PO3DM_TObjectArray = ^O3DM_TObjectArray;
 
-(*
-    R3D_PPosVector   pos;
-    R3D_PAngles      rot;
-    sint32 scx, scy, scz;       // Scale factors for the application to handle.
-                                // Recommended format is 16.16.
-                                // But note that they default to 0.
-    sint32 dcx, dcy, dcz;       // Center for the application to handle.
-                                // Recommended format is: same as vertices
-                                // *before* scaling.
-} O3DM_TObject, *O3DM_PObject;
-*)
-
 const
   // Material flags.
   O3DMF_NOSHADE = $0001;     // Don't apply any lightning.
@@ -294,4 +282,3 @@ const
 implementation
 
 end.
- 
