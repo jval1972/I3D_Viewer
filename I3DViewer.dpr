@@ -39,7 +39,8 @@ uses
   i3d_model in 'i3d_model.pas',
   i3d_structs in 'i3d_structs.pas',
   i3d_palette in 'i3d_palette.pas',
-  jcl_file in 'jcl_file.pas';
+  jcl_file in 'jcl_file.pas',
+  frm_selectmodel in 'frm_selectmodel.pas' {SelectModelForm};
 
 {$R *.res}
 
