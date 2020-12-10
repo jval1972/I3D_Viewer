@@ -52,7 +52,7 @@ type
     lastoffset: integer;
   end;
 
-function getlumpname(const l: speedlump_p): string;
+function getlumpname(const l: speedlump_t): string;
 
 const
   SH_FLAT_PREFIX = 'FLAT';
@@ -88,7 +88,7 @@ implementation
 uses
   i3d_utils;
 
-function getlumpname(const l: speedlump_p): string;
+function getlumpname(const l: speedlump_t): string;
 var
   i: integer;
 begin
@@ -134,7 +134,7 @@ var
   i: integer;
 begin
   for i := 0 to numl - 1 do
-    if getlumpname(@l[i]) = lmp then
+    if getlumpname(l[i]) = lmp then
     begin
       f.Seek(l[i].start, soFrombeginning);
       size := l[i].size;
@@ -154,7 +154,7 @@ var
   i: integer;
 begin
   for i := 0 to numl - 1 do
-    if getlumpname(@l[i]) = lmp then
+    if getlumpname(l[i]) = lmp then
     begin
       result := i;
       exit;
@@ -164,7 +164,7 @@ end;
 
 function TJCLReader.ReadHeader: boolean;
 begin
-  f.Seek(SizeOf(speedheader_t), soFromEnd);
+  f.Position := f.Size - SizeOf(speedheader_t);
   f.Read(header, SizeOf(speedheader_t));
   result := header.magic = JCL_MAGIC;
 end;
@@ -182,8 +182,8 @@ var
     nii, njj: string;
     eii, ejj: string;
   begin
-    fii := getlumpname(@flumps[ii]);
-    fjj := getlumpname(@flumps[jj]);
+    fii := getlumpname(flumps[ii]);
+    fjj := getlumpname(flumps[jj]);
     splitstring(fii, nii, eii, '.');
     splitstring(fjj, njj, ejj, '.');
     vii := StrToIntDef(nii, $FFFF);
@@ -204,7 +204,7 @@ begin
   fnumlumps := header.nlumps;
   GetMem(flumps, fnumlumps * SizeOf(speedlump_t));
   FillChar(flumps^, fnumlumps * SizeOf(speedlump_t), #0);
-  f.Seek(header.lastoffset, soFromEnd);
+  f.Position := f.Size - header.lastoffset;
   result := f.Read(flumps^, fnumlumps * SizeOf(speedlump_t)) = fnumlumps * SizeOf(speedlump_t);
   sz := f.Size;
   for i := 0 to fnumlumps - 1 do
