@@ -42,7 +42,7 @@ type
     objsize: integer;
     textures: array[0..$7F] of LongWord;  // texid is shortint (-128..127)
     numtextures: integer;
-    bitmaps: TStringList;
+    fbitmaps: TStringList;
   protected
     function GetNumFaces: integer; virtual;
     function GetFace(Index: Integer): O3DM_TFace_p; virtual;
@@ -56,6 +56,7 @@ type
     function RenderGL(const scale: single): integer;
     property faces[Index: integer]: O3DM_TFace_p read GetFace;
     property numfaces: integer read GetNumFaces;
+    property Bitmaps: TStringList read fbitmaps;
   end;
 
 implementation
@@ -71,13 +72,13 @@ begin
   obj := nil;
   objsize := 0;
   numtextures := 0;
-  bitmaps := TStringList.Create;
+  fbitmaps := TStringList.Create;
 end;
 
 destructor TI3DModel.Destroy;
 begin
   Clear;
-  bitmaps.Free;
+  fbitmaps.Free;
   Inherited Destroy;
 end;
 
@@ -209,7 +210,7 @@ begin
     inc(dest);
   end;
 
-  bitmaps.AddObject(m.texname, bm);
+  fbitmaps.AddObject(m.texname, bm);
 
   glGenTextures(1, @gltex);
   glBindTexture(GL_TEXTURE_2D, gltex);
@@ -262,9 +263,9 @@ begin
       glDeleteTextures(1, @textures[i]);
     numtextures := 0;
   end;
-  for i := 0 to bitmaps.Count - 1 do
-    bitmaps.Objects[i].Free;
-  bitmaps.Clear;
+  for i := 0 to fbitmaps.Count - 1 do
+    fbitmaps.Objects[i].Free;
+  fbitmaps.Clear;
 end;
 
 function TI3DModel.RenderGL(const scale: single): integer;

@@ -58,8 +58,6 @@ type
     N8: TMenuItem;
     Copy1: TMenuItem;
     ToolBar1: TToolBar;
-    OpenGLScrollBox: TScrollBox;
-    OpenGLPanel: TPanel;
     OpenButton1: TSpeedButton;
     NewButton1: TSpeedButton;
     ToolButton1: TToolButton;
@@ -79,6 +77,37 @@ type
     ExportScreenshot1: TMenuItem;
     Wireframe1: TMenuItem;
     Renderenviroment1: TMenuItem;
+    Panel1: TPanel;
+    Panel3: TPanel;
+    OpenGLScrollBox: TScrollBox;
+    OpenGLPanel: TPanel;
+    Splitter1: TSplitter;
+    Panel2: TPanel;
+    PageControl1: TPageControl;
+    FacesTabSheet1: TTabSheet;
+    Panel4: TPanel;
+    Panel5: TPanel;
+    Label1: TLabel;
+    FacesListBox: TListBox;
+    Label2: TLabel;
+    NumFaceVertexesEdit: TEdit;
+    Label3: TLabel;
+    FaceFlagsEdit: TEdit;
+    Label4: TLabel;
+    FacetoxEdit: TEdit;
+    Label5: TLabel;
+    FacetoyEdit: TEdit;
+    Label6: TLabel;
+    Label7: TLabel;
+    FacetsxEdit: TEdit;
+    FacetsyEdit: TEdit;
+    FacetaEdit: TEdit;
+    Label8: TLabel;
+    Label9: TLabel;
+    FaceMaterialColorEdit: TEdit;
+    Panel6: TPanel;
+    FaceTextureImage: TImage;
+    Label10: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -107,6 +136,7 @@ type
     procedure Wireframe1Click(Sender: TObject);
     procedure Renderenviroment1Click(Sender: TObject);
     procedure ExportScreenshot1Click(Sender: TObject);
+    procedure FacesListBoxClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -121,16 +151,22 @@ type
     needsrecalc: boolean;
     closing: boolean;
     model: TI3DModel;
+    cacheBM: TBitmap;
     procedure Idle(Sender: TObject; var Done: Boolean);
     function CheckCanClose: boolean;
     procedure DoNew;
     function DoLoadModel(const fname: string): boolean;
+    procedure PopulateFacesListBox;
+    procedure NotifyFacesListBox;
     procedure SetFileName(const fname: string; const modelname: string);
     procedure UpdateStausbar;
     procedure UpdateEnable;
     procedure OnLoadModelFileMenuHistory(Sender: TObject; const fname: string);
     procedure DoRenderGL;
     procedure Get3dPreviewBitmap(const b: TBitmap);
+    procedure BackgroundBMColor(const c: LongWord; const solid: boolean);
+    procedure BackgroundBMColorSolid(const c: LongWord);
+    procedure BackgroundBMColorClear(const c: LongWord);
   public
     { Public declarations }
   end;
@@ -144,6 +180,8 @@ uses
   i3d_gl,
   i3d_defs,
   i3d_utils,
+  i3d_structs,
+  i3d_palette,
   jcl_file,
   frm_selectmodel;
 
@@ -157,7 +195,21 @@ var
   pfd: TPIXELFORMATDESCRIPTOR;
   pf: Integer;
   doCreate: boolean;
+  i: integer;
 begin
+  DoubleBuffered := True;
+  for i := 0 to ComponentCount - 1 do
+    if Components[i].InheritsFrom(TWinControl) then
+      if not (Components[i] is TListBox) then
+        (Components[i] as TWinControl).DoubleBuffered := True;
+
+  cacheBM := TBitmap.Create;
+  cacheBM.Width := 256;
+  cacheBM.Height := 64;
+  cacheBM.PixelFormat := pf32bit;
+
+  FaceTextureImage.Picture.Bitmap.PixelFormat := pf32bit;
+  
   ffilename := '';
   fjclmodelname := '';
 
@@ -236,7 +288,10 @@ begin
   doCreate := True;
   if ParamCount > 0 then
     if DoLoadModel(ParamStr(1)) then
+    begin
+      PopulateFacesListBox;
       doCreate := False;
+    end;
 
   if DoCreate then
   begin
@@ -401,6 +456,93 @@ begin
   end;
 end;
 
+procedure TForm1.PopulateFacesListBox;
+var
+  i: integer;
+begin
+  FacesListBox.Clear;
+  for i := 0 to model.numfaces - 1 do
+    if model.faces[i].h.material.texname <> '' then
+      FacesListBox.Items.Add(Format('%.*d (%s)', [3, i, model.faces[i].h.material.texname]))
+    else
+      FacesListBox.Items.Add(Format('%.*d', [3, i]));
+  if FacesListBox.Items.Count > 0 then
+    FacesListBox.ItemIndex := 0;
+  NotifyFacesListBox;
+end;
+
+procedure TForm1.BackgroundBMColor(const c: LongWord; const solid: boolean);
+var
+  r, g, b: byte;
+begin
+  cacheBM.Canvas.Pen.Style := psSolid;
+  cacheBM.Canvas.Pen.Color := c;
+  cacheBM.Canvas.Brush.Style := bsSolid;
+  cacheBM.Canvas.Brush.Color := c;
+  cacheBM.Canvas.Rectangle(0, 0, 256, 64);
+  if not solid then
+  begin
+    r := GetRValue(c);
+    g := GetGValue(c);
+    b := GetBValue(c);
+    if r < 128 then r := 255 else r := 0;
+    if g < 128 then g := 255 else g := 0;
+    if b < 128 then b := 255 else b := 0;
+    cacheBM.Canvas.Brush.Style := bsDiagCross;
+    cacheBM.Canvas.Brush.Color := RGB(r, g, b);
+    cacheBM.Canvas.Rectangle(0, 0, 256, 64);
+  end;
+end;
+
+procedure TForm1.BackgroundBMColorSolid(const c: LongWord);
+begin
+  BackgroundBMColor(c, True);
+end;
+
+procedure TForm1.BackgroundBMColorClear(const c: LongWord);
+begin
+  BackgroundBMColor(c, False);
+end;
+
+procedure TForm1.NotifyFacesListBox;
+var
+  face: O3DM_TFace_p;
+  idx: integer;
+begin
+  face := model.faces[FacesListBox.ItemIndex];
+  if face = nil then
+  begin
+    NumFaceVertexesEdit.Text := '';
+    FaceFlagsEdit.Text := '';
+    FacetoxEdit.Text := '';
+    FacetoyEdit.Text := '';
+    FacetsxEdit.Text := '';
+    FacetsyEdit.Text := '';
+    FacetaEdit.Text := '';
+    FaceMaterialColorEdit.Color := RGB(255, 255, 255);
+    BackgroundBMColorClear(RGB(255, 255, 255));
+    FaceTextureImage.Picture.Bitmap.Canvas.Draw(0, 0, cacheBM);
+    Exit;
+  end;
+  NumFaceVertexesEdit.Text := IntToStr(face.h.nVerts);
+  FaceFlagsEdit.Text := IntToStr(face.h.flags);
+  FacetoxEdit.Text := IntToStr(face.h.tox);
+  FacetoyEdit.Text := IntToStr(face.h.toy);
+  FacetsxEdit.Text := IntToStr(face.h.tsx);
+  FacetsyEdit.Text := IntToStr(face.h.tsy);
+  FacetaEdit.Text := IntToStr(face.h.ta);
+  FaceMaterialColorEdit.Color := I3DPalColorL(face.h.material.color);
+  idx := model.Bitmaps.IndexOf(face.h.material.texname);
+  if idx >= 0 then
+  begin
+    BackgroundBMColorClear(I3DPalColorL(face.h.material.color));
+    cacheBM.Canvas.Draw(0, 0, model.Bitmaps.Objects[idx] as TBitmap);
+  end
+  else
+    BackgroundBMColorSolid(I3DPalColorL(face.h.material.color));
+  FaceTextureImage.Picture.Bitmap.Canvas.Draw(0, 0, cacheBM);
+end;
+
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   closing := True;
@@ -423,6 +565,7 @@ begin
   filemenuhistory.Free;
 
   model.Free;
+  cacheBM.Free;
 end;
 
 procedure TForm1.AboutButton1Click(Sender: TObject);
@@ -451,6 +594,7 @@ begin
   if OpenDialog1.Execute then
   begin
     DoLoadModel(OpenDialog1.FileName);
+    PopulateFacesListBox;
     ResetCamera;
   end;
 end;
@@ -630,6 +774,7 @@ begin
     Exit;
 
   DoLoadModel(fname);
+  PopulateFacesListBox;
   ResetCamera;
 end;
 
@@ -735,6 +880,11 @@ begin
       b.Free;
     end;
   end;
+end;
+
+procedure TForm1.FacesListBoxClick(Sender: TObject);
+begin
+  NotifyFacesListBox;
 end;
 
 end.
