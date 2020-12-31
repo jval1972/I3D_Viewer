@@ -42,6 +42,10 @@ type
     objsize: integer;
     textures: array[0..$7F] of LongWord;  // texid is shortint (-128..127)
     numtextures: integer;
+    bitmaps: TStringList;
+  protected
+    function GetNumFaces: integer; virtual;
+    function GetFace(Index: Integer): O3DM_TFace_p; virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -50,12 +54,15 @@ type
     procedure Clear;
     function CreateTexture(const m: O3DM_TMaterial_p): integer;
     function RenderGL(const scale: single): integer;
+    property faces[Index: integer]: O3DM_TFace_p read GetFace;
+    property numfaces: integer read GetNumFaces;
   end;
 
 implementation
 
 uses
   dglOpenGL,
+  graphics,
   i3d_palette;
 
 constructor TI3DModel.Create;
@@ -64,12 +71,32 @@ begin
   obj := nil;
   objsize := 0;
   numtextures := 0;
+  bitmaps := TStringList.Create;
 end;
 
 destructor TI3DModel.Destroy;
 begin
   Clear;
+  bitmaps.Free;
   Inherited Destroy;
+end;
+
+function TI3DModel.GetNumFaces: integer;
+begin
+  if obj = nil then
+    Result := 0
+  else
+    Result := obj.nFaces;
+end;
+
+function TI3DModel.GetFace(Index: Integer): O3DM_TFace_p;
+begin
+  if obj = nil then
+    Result := nil
+  else if (Index >= 0) and (Index < obj.nFaces) then
+    Result := @objfaces[Index]
+  else
+    Result := nil;
 end;
 
 function TI3DModel.LoadFromStream(const strm: TStream): boolean;
@@ -156,6 +183,7 @@ var
   dest: PLongWord;
   TEXDIMX, TEXDIMY: integer;
   gltex: LongWord;
+  bm: TBitmap;
 begin
   if m.flags and O3DMF_256 <> 0 then
   begin
@@ -167,13 +195,21 @@ begin
     TEXDIMX := 64;
     TEXDIMY := 64;
   end;
+
+  bm := TBitmap.create;
+  bm.Width := TEXDIMX;
+  bm.height := TEXDIMY;
+
   GetMem(buffer, TEXDIMX * TEXDIMY * SizeOf(LongWord));
   dest := @buffer[0];
   for i := 0 to TEXDIMX * TEXDIMY - 1 do
   begin
     dest^ := I3DPalColorL(m.texture[i]);
+    bm.Canvas.Pixels[i mod TEXDIMX, i div TEXDIMX] := dest^;
     inc(dest);
   end;
+
+  bitmaps.AddObject(m.texname, bm);
 
   glGenTextures(1, @gltex);
   glBindTexture(GL_TEXTURE_2D, gltex);
@@ -226,6 +262,9 @@ begin
       glDeleteTextures(1, @textures[i]);
     numtextures := 0;
   end;
+  for i := 0 to bitmaps.Count - 1 do
+    bitmaps.Objects[i].Free;
+  bitmaps.Clear;
 end;
 
 function TI3DModel.RenderGL(const scale: single): integer;
@@ -264,7 +303,6 @@ begin
 
   for i := 0 to obj.nFaces - 1 do
   begin
-
     if objfaces[i].h.material <> nil then
     begin
       newtex := 0;
