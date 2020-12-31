@@ -35,6 +35,19 @@ uses
   i3d_structs;
 
 type
+  TI3dModelCorrection = record
+    face: integer;
+    vertex: integer;
+    visible: boolean;
+    x, y, z: integer;
+    tx, ty: integer;
+    color: byte;
+  end;
+  PI3dModelCorrection = ^TI3dModelCorrection;
+  TI3dModelCorrectionArray = array[0..$FFF] of TI3dModelCorrection;
+  PI3dModelCorrectionArray = ^TI3dModelCorrectionArray;
+
+type
   TI3DModel = class(TObject)
   private
     obj: O3DM_TObject_p;
@@ -44,9 +57,12 @@ type
     numtextures: integer;
     fbitmaps: TStringList;
     fselected: integer;
+    corrections: PI3dModelCorrectionArray;
+    numcorrections: integer;
   protected
     function GetNumFaces: integer; virtual;
     function GetFace(Index: Integer): O3DM_TFace_p; virtual;
+    procedure ApplyCorrection(const cor: PI3dModelCorrection); virtual;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -55,6 +71,14 @@ type
     procedure Clear;
     function CreateTexture(const m: O3DM_TMaterial_p): integer;
     function RenderGL(const scale: single): integer;
+    function AddCorrection(const face: integer; const vertex: integer; const visible: boolean;
+      const x, y, z: integer; const du, dv: single; const c: LongWord): boolean;
+    procedure SaveCorrectionsToStream(const strm: TStream);
+    procedure SaveCorrectionsToFile(const fname: string);
+    procedure LoadCorrectionsFromStream(const strm: TStream);
+    procedure LoadCorrectionsFromFile(const fname: string);
+    procedure UVtoGL(const tx, tv: integer; var du, dv: single);
+    procedure GLtoUV(const du, dv: single; var tx, tv: integer);
     property faces[Index: integer]: O3DM_TFace_p read GetFace;
     property numfaces: integer read GetNumFaces;
     property Bitmaps: TStringList read fbitmaps;
@@ -65,8 +89,10 @@ implementation
 
 uses
   dglOpenGL,
-  graphics,
-  i3d_palette;
+  Graphics,
+  i3d_palette,
+  i3d_utils,
+  i3d_scriptengine;
 
 constructor TI3DModel.Create;
 begin
@@ -76,6 +102,8 @@ begin
   numtextures := 0;
   fselected := -1;
   fbitmaps := TStringList.Create;
+  corrections := nil;
+  numcorrections := 0;
 end;
 
 destructor TI3DModel.Destroy;
@@ -155,6 +183,7 @@ begin
     end;
     if objfaces[i].h.material <> nil then
       objfaces[i].h.material := _OF(objfaces[i].h.material);
+    objfaces[i].h.visible := True;
   end;
 
   for i := 0 to obj.nMaterials - 1 do
@@ -270,6 +299,212 @@ begin
     fbitmaps.Objects[i].Free;
   fbitmaps.Clear;
   fselected := -1;
+  if numcorrections <> 0 then
+  begin
+    FreeMem(corrections, numcorrections * SizeOf(TI3dModelCorrection));
+    numcorrections := 0;
+  end;
+end;
+
+procedure TI3DModel.ApplyCorrection(const cor: PI3dModelCorrection);
+var
+  face: O3DM_TFace_p;
+begin
+  if obj = nil then
+    Exit;
+    
+  if not IsIntInRange(cor.face, 0, obj.nFaces - 1) then
+    Exit;
+
+  face := @objfaces[cor.face];
+  if not IsIntInRange(cor.vertex, 0, face.h.nVerts - 1) then
+    Exit;
+
+  face.h.visible := face.h.visible and cor.visible;
+  face.verts[cor.vertex].vert.x := cor.x;
+  face.verts[cor.vertex].vert.y := cor.y;
+  face.verts[cor.vertex].vert.z := cor.z;
+  face.verts[cor.vertex].tx := cor.tx;
+  face.verts[cor.vertex].ty := cor.ty;
+  if face.h.material <> nil then
+    face.h.material.color := cor.color;
+end;
+
+function TI3DModel.AddCorrection(const face: integer; const vertex: integer; const visible: boolean;
+  const x, y, z: integer; const du, dv: single; const c: LongWord): boolean;
+var
+  i, idx: integer;
+  cor: PI3dModelCorrection;
+begin
+  Result := False;
+
+  if not IsIntInRange(face, 0, obj.nFaces - 1) then
+    Exit;
+
+  if not IsIntInRange(vertex, 0, objfaces[face].h.nVerts - 1) then
+    Exit;
+
+  idx := -1;
+  for i := 0 to numcorrections - 1 do
+    if (corrections[i].face = face) and (corrections[i].vertex = vertex) then
+    begin
+      idx := i;
+      Break;
+    end;
+
+  if idx < 0 then
+  begin
+    ReAllocMem(corrections, (numcorrections + 1) * SizeOf(TI3dModelCorrection));
+    idx := numcorrections;
+    inc(numcorrections);
+  end;
+
+  cor := @corrections[idx];
+  cor.face := face;
+  cor.vertex := vertex;
+  for i := 0 to numcorrections - 1 do
+    if corrections[i].face = face then
+      corrections[i].visible := visible;
+  cor.x := x;
+  cor.y := y;
+  cor.z := z;
+  GLtoUV(du, dv, cor.tx, cor.ty);
+  cor.color := I3DPalColorIndex(c);
+  ApplyCorrection(@cor);
+
+  Result := True;
+end;
+
+procedure TI3DModel.SaveCorrectionsToStream(const strm: TStream);
+var
+  i: integer;
+  s: TStringList;
+  cor: PI3dModelCorrection;
+  vis: integer;
+begin
+  if obj = nil then
+    Exit;
+  s := TStringList.Create;
+  try
+    for i := 0 to numcorrections - 1 do
+    begin
+      cor := @corrections[i];
+      if IsIntInRange(cor.face, 0, obj.nFaces - 1) then
+        if IsIntInRange(cor.vertex, 0, objfaces[cor.face].h.nVerts - 1) then
+        begin
+          if cor.visible then
+            vis := 1
+          else
+            vis := 0;
+          s.Add(
+            Format('face %d vertex %d visible %d x %d y %d z %d tx %d ty %d color %d',
+              [cor.face, cor.vertex, vis, cor.x, cor.y, cor.z, cor.tx, cor.ty, cor.color])
+          );
+        end;
+    end;
+  finally
+    s.Free;
+  end;
+end;
+
+procedure TI3DModel.SaveCorrectionsToFile(const fname: string);
+var
+  fs: TFileStream;
+begin
+  fs := TFileStream.Create(fname, fmCreate);
+  SaveCorrectionsToStream(fs);
+  fs.Free;
+end;
+
+procedure TI3DModel.LoadCorrectionsFromStream(const strm: TStream);
+var
+  sc: TScriptEngine;
+  s: TStringList;
+  cor: PI3dModelCorrection;
+begin
+  ReallocMem(corrections, 0);
+  numcorrections := 0;
+  s := TStringList.Create;
+  try
+    s.LoadFromStream(strm);
+    sc := TScriptEngine.Create(s.Text);
+    while sc.GetString do
+    begin
+      if sc.MatchString('face') then
+      begin
+        ReallocMem(corrections, (numcorrections + 1) * SizeOf(TI3dModelCorrection));
+        cor := @corrections[numcorrections];
+        inc(numcorrections);
+
+        sc.MustGetInteger;
+        cor.face := sc._Integer;
+
+        sc.MustGetStringName('vertex');
+        sc.MustGetInteger;
+        cor.vertex := sc._Integer;
+
+        sc.MustGetStringName('visible');
+        sc.MustGetInteger;
+        if sc._Integer = 0 then
+          cor.visible := False
+        else
+          cor.visible := True;
+
+        sc.MustGetStringName('x');
+        sc.MustGetInteger;
+        cor.x := sc._Integer;
+
+        sc.MustGetStringName('y');
+        sc.MustGetInteger;
+        cor.y := sc._Integer;
+
+        sc.MustGetStringName('z');
+        sc.MustGetInteger;
+        cor.z := sc._Integer;
+
+        sc.MustGetStringName('tx');
+        sc.MustGetInteger;
+        cor.tx := sc._Integer;
+
+        sc.MustGetStringName('ty');
+        sc.MustGetInteger;
+        cor.ty := sc._Integer;
+
+        sc.MustGetStringName('color');
+        sc.MustGetInteger;
+        cor.color := sc._Integer;
+
+        ApplyCorrection(cor);
+      end;
+    end;
+    sc.Free;
+  finally
+    s.Free;
+  end;
+end;
+
+procedure TI3DModel.LoadCorrectionsFromFile(const fname: string);
+var
+  fs: TFileStream;
+begin
+  fs := TFileStream.Create(fname, fmOpenRead or fmShareDenyWrite);
+  LoadCorrectionsFromStream(fs);
+  fs.Free;
+end;
+
+const
+  UVGLCONST = 262144 * 64;
+
+procedure TI3DModel.UVtoGL(const tx, tv: integer; var du, dv: single);
+begin
+  du := tx / UVGLCONST;
+  dv := tv / UVGLCONST;
+end;
+
+procedure TI3DModel.GLtoUV(const du, dv: single; var tx, tv: integer);
+begin
+  tx := Round(du * UVGLCONST);
+  tv := Round(dv * UVGLCONST);
 end;
 
 function TI3DModel.RenderGL(const scale: single): integer;
@@ -289,8 +524,11 @@ var
   end;
 
   procedure _gltexcoord(const tx, ty: integer);
+  var
+    ax, ay: single;
   begin
-    glTexCoord2f(- tx / 262144 / 64, ty / 262144 / 64);
+    UVtoGL(tx, ty, ax, ay);
+    glTexCoord2f(ax, ay);
   end;
 
   procedure _glvertex(const x, y, z: integer);
@@ -308,6 +546,8 @@ begin
 
   for i := 0 to obj.nFaces - 1 do
   begin
+    if not objfaces[i].h.visible then
+      Continue;
     if fselected = i then
       Continue;
     if objfaces[i].h.material <> nil then
