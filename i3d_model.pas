@@ -43,6 +43,7 @@ type
     textures: array[0..$7F] of LongWord;  // texid is shortint (-128..127)
     numtextures: integer;
     fbitmaps: TStringList;
+    fselected: integer;
   protected
     function GetNumFaces: integer; virtual;
     function GetFace(Index: Integer): O3DM_TFace_p; virtual;
@@ -57,6 +58,7 @@ type
     property faces[Index: integer]: O3DM_TFace_p read GetFace;
     property numfaces: integer read GetNumFaces;
     property Bitmaps: TStringList read fbitmaps;
+    property selected: integer read fselected write fselected;
   end;
 
 implementation
@@ -72,6 +74,7 @@ begin
   obj := nil;
   objsize := 0;
   numtextures := 0;
+  fselected := -1;
   fbitmaps := TStringList.Create;
 end;
 
@@ -266,6 +269,7 @@ begin
   for i := 0 to fbitmaps.Count - 1 do
     fbitmaps.Objects[i].Free;
   fbitmaps.Clear;
+  fselected := -1;
 end;
 
 function TI3DModel.RenderGL(const scale: single): integer;
@@ -304,6 +308,8 @@ begin
 
   for i := 0 to obj.nFaces - 1 do
   begin
+    if fselected = i then
+      Continue;
     if objfaces[i].h.material <> nil then
     begin
       newtex := 0;

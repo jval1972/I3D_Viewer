@@ -679,6 +679,8 @@ begin
   DoRenderGL;
 
   glneedsupdate := False;
+
+  Done := True;
 end;
 
 procedure TForm1.ApplicationEvents1Idle(Sender: TObject;
@@ -752,8 +754,16 @@ begin
   glneedsupdate := True;
 end;
 
+var
+  timercnt: integer = 0;
+
 procedure TForm1.Timer1Timer(Sender: TObject);
 begin
+  inc(timercnt);
+  if Odd(timercnt) then
+    model.selected := FacesListBox.ItemIndex
+  else
+    model.selected := -1; 
   glneedsupdate := True;
 end;
 
