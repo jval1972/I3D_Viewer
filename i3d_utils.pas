@@ -86,6 +86,8 @@ type
 
 procedure splitstring(const inp: string; var out1, out2: string; const splitter: string = ' ');
 
+function CheckParam(const parm: string): integer;
+
 implementation
 
 uses
@@ -409,6 +411,21 @@ begin
     out1 := Trim(Copy(inp, 1, p - 1));
     out2 := Trim(Copy(inp, p + 1, Length(inp) - p));
   end;
+end;
+
+function CheckParam(const parm: string): integer;
+var
+  i: integer;
+  uParm: string;
+begin
+  uParm := UpperCase(parm);
+  for i := 1 to ParamCount do
+    if UpperCase(ParamStr(i)) = uParm then
+    begin
+      Result := i;
+      Exit;
+    end;
+  Result := -1;
 end;
 
 end.
