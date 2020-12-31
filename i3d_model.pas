@@ -56,6 +56,7 @@ type
     textures: array[0..$7F] of LongWord;  // texid is shortint (-128..127)
     numtextures: integer;
     headers: PO3DM_TFaceHeaderArray;
+    materials: PO3DM_TMaterialArray;
     facevertexes: PO3DM_TFaceVertexArray;
     numfacevertexes: integer;
     vertexes: PO3DM_TVertexArray;
@@ -177,6 +178,7 @@ begin
   GetMem(objfaces, obj.nFaces * SizeOf(O3DM_TFace));
 
   GetMem(headers, obj.nFaces * SizeOf(O3DM_TFaceHeader));
+  GetMem(materials, obj.nFaces * SizeOf(O3DM_TMaterial));
   numfacevertexes := 0;
   numvertexes := 0;
   facecachepos := 0;
@@ -237,6 +239,12 @@ begin
       objfaces[i].verts[j].vert := @vertexes[l];
       inc(l);
     end;
+
+  for i := 0 to obj.nFaces - 1 do
+  begin
+    materials[i] := objfaces[i].h.material^;
+    objfaces[i].h.material := @materials[i];
+  end;
 
   Result := True;
 end;
@@ -317,6 +325,7 @@ begin
   if obj <> nil then
   begin
     FreeMem(headers, obj.nFaces * SizeOf(O3DM_TFaceHeader));
+    FreeMem(materials, obj.nFaces * SizeOf(O3DM_TMaterial));
     FreeMem(facevertexes, numfacevertexes * SizeOf(O3DM_TFaceVertex));
     FreeMem(vertexes, numvertexes * SizeOf(O3DM_TVertex));
     FreeMem(objfaces, obj.nFaces * SizeOf(O3DM_TFace));
