@@ -268,8 +268,11 @@ var
   fs: TFileStream;
 begin
   fs := TFileStream.Create(fname, fmOpenRead or fmShareDenyWrite);
-  result := LoadFromStream(fs);
-  fs.Free;
+  try
+    result := LoadFromStream(fs);
+  finally
+    fs.Free;
+  end;
 end;
 
 procedure TI3DModel.Clear;
@@ -416,8 +419,11 @@ var
   fs: TFileStream;
 begin
   fs := TFileStream.Create(fname, fmCreate);
-  SaveCorrectionsToStream(fs);
-  fs.Free;
+  try
+    SaveCorrectionsToStream(fs);
+  finally
+    fs.Free;
+  end;
 end;
 
 procedure TI3DModel.LoadCorrectionsFromStream(const strm: TStream);
@@ -492,8 +498,11 @@ var
   fs: TFileStream;
 begin
   fs := TFileStream.Create(fname, fmOpenRead or fmShareDenyWrite);
-  LoadCorrectionsFromStream(fs);
-  fs.Free;
+  try
+    LoadCorrectionsFromStream(fs);
+  finally
+    fs.Free;
+  end;
 end;
 
 const
