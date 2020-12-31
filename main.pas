@@ -770,7 +770,10 @@ procedure TForm1.OpenGLPanelMouseMove(Sender: TObject; Shift: TShiftState;
   X, Y: Integer);
 begin
   if glmousedown = 0 then
-    exit;
+  begin
+    try OpenGLPanel.SetFocus; except end;
+    Exit;
+  end;
 
   if glmousedown = 1 then
   begin

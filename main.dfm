@@ -1,8 +1,8 @@
 object Form1: TForm1
   Left = 149
-  Top = 101
+  Top = 100
   Width = 1109
-  Height = 653
+  Height = 654
   Caption = 'I3D Model Viewer (Speed Haste Model Viewer)'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -1057,7 +1057,7 @@ object Form1: TForm1
   TextHeight = 13
   object StatusBar1: TStatusBar
     Left = 0
-    Top = 575
+    Top = 576
     Width = 1093
     Height = 19
     Panels = <
@@ -1420,7 +1420,7 @@ object Form1: TForm1
     Left = 0
     Top = 40
     Width = 1093
-    Height = 535
+    Height = 536
     Align = alClient
     BevelOuter = bvNone
     Caption = ' '
@@ -1428,14 +1428,14 @@ object Form1: TForm1
     object Splitter1: TSplitter
       Left = 280
       Top = 0
-      Height = 535
+      Height = 536
       MinSize = 270
     end
     object Panel3: TPanel
       Left = 283
       Top = 0
       Width = 810
-      Height = 535
+      Height = 536
       Align = alClient
       Caption = ' '
       TabOrder = 0
@@ -1443,7 +1443,7 @@ object Form1: TForm1
         Left = 1
         Top = 1
         Width = 808
-        Height = 533
+        Height = 534
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
@@ -1469,7 +1469,7 @@ object Form1: TForm1
       Left = 0
       Top = 0
       Width = 280
-      Height = 535
+      Height = 536
       Align = alLeft
       Caption = ' '
       Constraints.MinWidth = 270
@@ -1478,7 +1478,7 @@ object Form1: TForm1
         Left = 1
         Top = 1
         Width = 278
-        Height = 533
+        Height = 534
         ActivePage = FacesTabSheet1
         Align = alClient
         Style = tsFlatButtons
@@ -1489,7 +1489,7 @@ object Form1: TForm1
             Left = 0
             Top = 0
             Width = 270
-            Height = 502
+            Height = 503
             Align = alClient
             BevelOuter = bvNone
             Caption = ' '
@@ -1641,7 +1641,7 @@ object Form1: TForm1
             end
             object Panel6: TPanel
               Left = 0
-              Top = 365
+              Top = 366
               Width = 270
               Height = 137
               Align = alBottom
@@ -1944,7 +1944,7 @@ object Form1: TForm1
               Left = 0
               Top = 217
               Width = 270
-              Height = 148
+              Height = 149
               Align = alClient
               Caption = ' '
               TabOrder = 2
@@ -1969,7 +1969,7 @@ object Form1: TForm1
                 Left = 1
                 Top = 25
                 Width = 268
-                Height = 122
+                Height = 123
                 Align = alClient
                 BevelOuter = bvNone
                 BorderWidth = 2
@@ -1979,14 +1979,14 @@ object Form1: TForm1
                   Left = 2
                   Top = 2
                   Width = 264
-                  Height = 118
+                  Height = 119
                   Align = alClient
                   BorderStyle = bsNone
                   ColCount = 8
                   DefaultColWidth = 32
                   DefaultRowHeight = 14
                   FixedCols = 0
-                  Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
+                  Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect]
                   TabOrder = 0
                 end
               end
