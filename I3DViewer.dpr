@@ -41,7 +41,9 @@ uses
   i3d_palette in 'i3d_palette.pas',
   jcl_file in 'jcl_file.pas',
   frm_selectmodel in 'frm_selectmodel.pas' {SelectModelForm},
-  i3d_scriptengine in 'i3d_scriptengine.pas';
+  i3d_scriptengine in 'i3d_scriptengine.pas',
+  frm_editcorrection in 'frm_editcorrection.pas' {EditCorrectionForm},
+  i3d_colorpickerbutton in 'i3d_colorpickerbutton.pas';
 
 {$R *.res}
 

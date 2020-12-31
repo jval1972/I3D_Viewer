@@ -335,6 +335,7 @@ function TI3DModel.AddCorrection(const face: integer; const vertex: integer; con
 var
   i, idx: integer;
   cor: PI3dModelCorrection;
+  tx, ty: integer;
 begin
   Result := False;
 
@@ -368,9 +369,11 @@ begin
   cor.x := x;
   cor.y := y;
   cor.z := z;
-  GLtoUV(du, dv, cor.tx, cor.ty);
+  GLtoUV(du, dv, tx, ty);
+  cor.tx := tx;
+  cor.ty := ty;
   cor.color := I3DPalColorIndex(c);
-  ApplyCorrection(@cor);
+  ApplyCorrection(cor);
 
   Result := True;
 end;
@@ -402,6 +405,7 @@ begin
           );
         end;
     end;
+    s.SaveToStream(strm);
   finally
     s.Free;
   end;
@@ -497,13 +501,13 @@ const
 
 procedure TI3DModel.UVtoGL(const tx, tv: integer; var du, dv: single);
 begin
-  du := tx / UVGLCONST;
+  du := -tx / UVGLCONST;
   dv := tv / UVGLCONST;
 end;
 
 procedure TI3DModel.GLtoUV(const du, dv: single; var tx, tv: integer);
 begin
-  tx := Round(du * UVGLCONST);
+  tx := -Round(du * UVGLCONST);
   tv := Round(dv * UVGLCONST);
 end;
 

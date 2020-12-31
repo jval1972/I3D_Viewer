@@ -115,6 +115,12 @@ type
     VertStringGrid: TStringGrid;
     PopupMenu1: TPopupMenu;
     MNCopyTexture: TMenuItem;
+    MNOpenCorrections: TMenuItem;
+    OpenCorrectionsDialog: TOpenDialog;
+    SaveCorrectionsDialog: TSaveDialog;
+    MNSaveCorrections: TMenuItem;
+    N1: TMenuItem;
+    EditFaceSpeedButton: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -145,6 +151,9 @@ type
     procedure ExportScreenshot1Click(Sender: TObject);
     procedure FacesListBoxClick(Sender: TObject);
     procedure MNCopyTextureClick(Sender: TObject);
+    procedure MNOpenCorrectionsClick(Sender: TObject);
+    procedure MNSaveCorrectionsClick(Sender: TObject);
+    procedure EditFaceSpeedButtonClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -160,6 +169,7 @@ type
     closing: boolean;
     model: TI3DModel;
     cacheBM: TBitmap;
+    devparm: boolean;
     procedure Idle(Sender: TObject; var Done: Boolean);
     function CheckCanClose: boolean;
     procedure DoNew;
@@ -193,7 +203,8 @@ uses
   i3d_structs,
   i3d_palette,
   jcl_file,
-  frm_selectmodel;
+  frm_selectmodel,
+  frm_editcorrection;
 
 {$R *.dfm}
 
@@ -212,6 +223,11 @@ begin
     if Components[i].InheritsFrom(TWinControl) then
       if not (Components[i] is TListBox) then
         (Components[i] as TWinControl).DoubleBuffered := True;
+
+  devparm := CheckParam('-devparm') > 0;
+  MNOpenCorrections.Visible := devparm;
+  MNSaveCorrections.Visible := devparm;
+  EditFaceSpeedButton.Visible := devparm;
 
   cacheBM := TBitmap.Create;
   cacheBM.Width := 256;
@@ -299,11 +315,12 @@ begin
 
   doCreate := True;
   if ParamCount > 0 then
-    if DoLoadModel(ParamStr(1)) then
-    begin
-      PopulateFacesListBox;
-      doCreate := False;
-    end;
+    if Pos('-', ParamStr(1)) = 0 then
+      if DoLoadModel(ParamStr(1)) then
+      begin
+        PopulateFacesListBox;
+        doCreate := False;
+      end;
 
   if DoCreate then
   begin
@@ -961,6 +978,29 @@ end;
 procedure TForm1.MNCopyTextureClick(Sender: TObject);
 begin
   ClipBoard.Assign(FaceTextureImage.Picture.Bitmap);
+end;
+
+procedure TForm1.MNOpenCorrectionsClick(Sender: TObject);
+begin
+  if OpenCorrectionsDialog.Execute then
+    model.LoadCorrectionsFromFile(OpenCorrectionsDialog.FileName);
+end;
+
+procedure TForm1.MNSaveCorrectionsClick(Sender: TObject);
+begin
+  if SaveCorrectionsDialog.Execute then
+  begin
+    BackupFile(SaveCorrectionsDialog.FileName);
+    model.SaveCorrectionsToFile(SaveCorrectionsDialog.FileName);
+  end;
+end;
+
+procedure TForm1.EditFaceSpeedButtonClick(Sender: TObject);
+begin
+  if not devparm then
+    Exit;
+
+  OpenCorrectionForm(model, FacesListBox.ItemIndex);
 end;
 
 end.
