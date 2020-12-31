@@ -71,6 +71,7 @@ type
     procedure Clear;
     function CreateTexture(const m: O3DM_TMaterial_p): integer;
     function RenderGL(const scale: single): integer;
+    procedure RenderSelectionCubeGL(const scale: single);
     function AddCorrection(const face: integer; const vertex: integer; const visible: boolean;
       const x, y, z: integer; const du, dv: single; const c: LongWord): boolean;
     procedure SaveCorrectionsToStream(const strm: TStream);
@@ -305,6 +306,7 @@ begin
   if numcorrections <> 0 then
   begin
     FreeMem(corrections, numcorrections * SizeOf(TI3dModelCorrection));
+    corrections := nil;
     numcorrections := 0;
   end;
 end;
@@ -323,7 +325,7 @@ begin
   if not IsIntInRange(cor.vertex, 0, face.h.nVerts - 1) then
     Exit;
 
-  face.h.visible := face.h.visible and cor.visible;
+  face.h.visible := cor.visible;
   face.verts[cor.vertex].vert.x := cor.x;
   face.verts[cor.vertex].vert.y := cor.y;
   face.verts[cor.vertex].vert.z := cor.z;
@@ -368,7 +370,10 @@ begin
   cor.vertex := vertex;
   for i := 0 to numcorrections - 1 do
     if corrections[i].face = face then
+    begin
       corrections[i].visible := visible;
+      ApplyCorrection(@corrections[i]);
+    end;
   cor.x := x;
   cor.y := y;
   cor.z := z;
@@ -553,7 +558,7 @@ begin
   Result := 0;
 
   if obj = nil then
-    exit;
+    Exit;
 
   lasttex := $FFFFFFFF;
 
@@ -604,6 +609,111 @@ begin
 
     Result := Result + objfaces[i].h.nVerts - 2;
   end;
+end;
+
+procedure TI3DModel.RenderSelectionCubeGL(const scale: single);
+const
+  BOUNDSIZE = 384;
+var
+  minx, maxx: integer;
+  miny, maxy: integer;
+  minz, maxz: integer;
+  face: O3DM_TFace_p;
+  i: integer;
+  procedure _glvertex(const x, y, z: integer);
+  begin
+    glVertex3f(x * scale, y * scale, z * scale);
+  end;
+begin
+  if obj = nil then
+    Exit;
+
+  if not IsIntInRange(fselected, 0, obj.nFaces - 1) then
+    Exit;
+
+  face := @objfaces[fselected];
+  minx := MAXINT;
+  maxx := -MAXINT;
+  miny := MAXINT;
+  maxy := -MAXINT;
+  minz := MAXINT;
+  maxz := -MAXINT;
+
+  for i := 0 to face.h.nVerts - 1 do
+  begin
+    if face.verts[i].vert.x < minx then
+      minx := face.verts[i].vert.x;
+    if face.verts[i].vert.x > maxx then
+      maxx := face.verts[i].vert.x;
+    if face.verts[i].vert.y < miny then
+      miny := face.verts[i].vert.y;
+    if face.verts[i].vert.y > maxy then
+      maxy := face.verts[i].vert.y;
+    if face.verts[i].vert.z < minz then
+      minz := face.verts[i].vert.z;
+    if face.verts[i].vert.z > maxz then
+      maxz := face.verts[i].vert.z;
+  end;
+
+  minx := minx - BOUNDSIZE;
+  maxx := maxx + BOUNDSIZE;
+  miny := miny - BOUNDSIZE;
+  maxy := maxy + BOUNDSIZE;
+  minz := minz - BOUNDSIZE;
+  maxz := maxz + BOUNDSIZE;
+
+  glBegin(GL_LINES);
+    // Left rect
+    _glvertex(minx, miny, minz);
+    _glvertex(minx, miny, maxz);
+
+    _glvertex(minx, miny, maxz);
+    _glvertex(minx, maxy, maxz);
+
+    _glvertex(minx, maxy, maxz);
+    _glvertex(minx, maxy, minz);
+
+    _glvertex(minx, maxy, minz);
+    _glvertex(minx, miny, minz);
+
+    // Right rect
+    _glvertex(maxx, miny, minz);
+    _glvertex(maxx, miny, maxz);
+
+    _glvertex(maxx, miny, maxz);
+    _glvertex(maxx, maxy, maxz);
+
+    _glvertex(maxx, maxy, maxz);
+    _glvertex(maxx, maxy, minz);
+
+    _glvertex(maxx, maxy, minz);
+    _glvertex(maxx, miny, minz);
+
+    // Connect left & right rect
+    _glvertex(minx, miny, minz);
+    _glvertex(maxx, miny, minz);
+
+    _glvertex(minx, maxy, minz);
+    _glvertex(maxx, maxy, minz);
+
+    _glvertex(minx, maxy, maxz);
+    _glvertex(maxx, maxy, maxz);
+
+    _glvertex(minx, miny, maxz);
+    _glvertex(maxx, miny, maxz);
+
+    // Axes
+    _glvertex(minx - 2 * BOUNDSIZE, (maxy + miny) div 2, (maxz + minz) div 2);
+    _glvertex(maxx + 2 * BOUNDSIZE, (maxy + miny) div 2, (maxz + minz) div 2);
+
+    _glvertex((maxx + minx) div 2, miny - 2 * BOUNDSIZE, (maxz + minz) div 2);
+    _glvertex((maxx + minx) div 2, maxy + 2 * BOUNDSIZE, (maxz + minz) div 2);
+
+    _glvertex((maxx + minx) div 2, (maxy + miny) div 2, minz - 2 * BOUNDSIZE);
+    _glvertex((maxx + minx) div 2, (maxy + miny) div 2, maxz + 2 * BOUNDSIZE);
+
+  glEnd;
+
 end;
 
 end.

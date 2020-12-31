@@ -259,12 +259,22 @@ begin
 end;
 
 procedure glRenderI3D(const t: TI3DModel);
+const
+  DEF_SCALE = 0.001;
 begin
   if opt_renderwireframe then
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE )
   else
     glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
+  // Render selected object
+  glColor4f(1.0, 0.0, 0.0, 1.0);
+
+  glDisable(GL_TEXTURE_2D);
+
+  t.RenderSelectionCubeGL(DEF_SCALE);
+
+  // Render model
   glColor4f(1.0, 1.0, 1.0, 1.0);
 
   glEnable(GL_TEXTURE_2D);
@@ -272,7 +282,7 @@ begin
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
 
-  i3d_rendredtriangles := t.RenderGL(0.001);
+  i3d_rendredtriangles := t.RenderGL(DEF_SCALE);
 
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);
