@@ -33,7 +33,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, ExtCtrls, Buttons, Menus,
   StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, i3d_model, 
-  i3d_filemenuhistory;
+  i3d_filemenuhistory, Grids;
 
 type
   TForm1 = class(TForm)
@@ -103,11 +103,16 @@ type
     FacetsyEdit: TEdit;
     FacetaEdit: TEdit;
     Label8: TLabel;
-    Label9: TLabel;
-    FaceMaterialColorEdit: TEdit;
     Panel6: TPanel;
     FaceTextureImage: TImage;
     Label10: TLabel;
+    Label9: TLabel;
+    FaceMaterialColorEdit: TEdit;
+    Panel7: TPanel;
+    Panel8: TPanel;
+    Label11: TLabel;
+    Panel9: TPanel;
+    VertStringGrid: TStringGrid;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -158,6 +163,7 @@ type
     function DoLoadModel(const fname: string): boolean;
     procedure PopulateFacesListBox;
     procedure SetFaceMaterialColorEdit(const c: LongWord);
+    procedure MakeGrid;
     procedure NotifyFacesListBox;
     procedure SetFileName(const fname: string; const modelname: string);
     procedure UpdateStausbar;
@@ -210,6 +216,8 @@ begin
   cacheBM.PixelFormat := pf32bit;
 
   FaceTextureImage.Picture.Bitmap.PixelFormat := pf32bit;
+
+  MakeGrid;
   
   ffilename := '';
   fjclmodelname := '';
@@ -520,10 +528,26 @@ begin
   FaceMaterialColorEdit.Font.Color := RGB(r, g, b);
 end;
 
+procedure TForm1.MakeGrid;
+begin
+  VertStringGrid.RowCount := 1;
+  VertStringGrid.ColCount := 5;
+  VertStringGrid.ColWidths[0] := 32;
+  VertStringGrid.ColWidths[1] := 32;
+  VertStringGrid.ColWidths[2] := 32;
+  VertStringGrid.ColWidths[3] := 64;
+  VertStringGrid.ColWidths[4] := 64;
+  VertStringGrid.Cells[0, 0] := 'x';
+  VertStringGrid.Cells[1, 0] := 'y';
+  VertStringGrid.Cells[2, 0] := 'z';
+  VertStringGrid.Cells[3, 0] := 'tx';
+  VertStringGrid.Cells[4, 0] := 'ty';
+end;
+
 procedure TForm1.NotifyFacesListBox;
 var
   face: O3DM_TFace_p;
-  idx: integer;
+  i, idx: integer;
 begin
   face := model.faces[FacesListBox.ItemIndex];
   if face = nil then
@@ -537,8 +561,10 @@ begin
     FacetaEdit.Text := '';
     SetFaceMaterialColorEdit(RGB(255, 255, 255));
     FaceTextureImage.Picture.Bitmap.Canvas.Draw(0, 0, cacheBM);
+    MakeGrid;
     Exit;
   end;
+
   NumFaceVertexesEdit.Text := IntToStr(face.h.nVerts);
   FaceFlagsEdit.Text := IntToStr(face.h.flags);
   FacetoxEdit.Text := IntToStr(face.h.tox);
@@ -546,6 +572,7 @@ begin
   FacetsxEdit.Text := IntToStr(face.h.tsx);
   FacetsyEdit.Text := IntToStr(face.h.tsy);
   FacetaEdit.Text := IntToStr(face.h.ta);
+
   SetFaceMaterialColorEdit(I3DPalColorL(face.h.material.color));
   idx := model.Bitmaps.IndexOf(face.h.material.texname);
   if idx >= 0 then
@@ -556,6 +583,17 @@ begin
   else
     BackgroundBMColorSolid(I3DPalColorL(face.h.material.color));
   FaceTextureImage.Picture.Bitmap.Canvas.Draw(0, 0, cacheBM);
+
+  MakeGrid;
+  VertStringGrid.RowCount := face.h.nVerts + 1;
+  for i := 0 to face.h.nVerts - 1 do
+  begin
+    VertStringGrid.Cells[0, i + 1] := IntToStr(face.verts[i].vert.x);
+    VertStringGrid.Cells[1, i + 1] := IntToStr(face.verts[i].vert.y);
+    VertStringGrid.Cells[2, i + 1] := IntToStr(face.verts[i].vert.z);
+    VertStringGrid.Cells[3, i + 1] := IntToStr(face.verts[i].tx);
+    VertStringGrid.Cells[4, i + 1] := IntToStr(face.verts[i].ty);
+  end;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);

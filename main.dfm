@@ -1498,7 +1498,7 @@ object Form1: TForm1
               Left = 0
               Top = 0
               Width = 270
-              Height = 329
+              Height = 217
               Align = alTop
               Caption = ' '
               TabOrder = 0
@@ -1566,19 +1566,11 @@ object Form1: TForm1
                 Caption = 'ta: '
                 FocusControl = FacetaEdit
               end
-              object Label9: TLabel
-                Left = 120
-                Top = 200
-                Width = 32
-                Height = 13
-                Caption = 'Color: '
-                FocusControl = FaceMaterialColorEdit
-              end
               object FacesListBox: TListBox
                 Left = 8
                 Top = 32
                 Width = 89
-                Height = 281
+                Height = 169
                 ItemHeight = 13
                 TabOrder = 0
                 OnClick = FacesListBoxClick
@@ -1646,27 +1638,18 @@ object Form1: TForm1
                 TabOrder = 7
                 Text = ' '
               end
-              object FaceMaterialColorEdit: TEdit
-                Left = 152
-                Top = 200
-                Width = 81
-                Height = 21
-                ReadOnly = True
-                TabOrder = 8
-                Text = ' '
-              end
             end
             object Panel6: TPanel
               Left = 0
-              Top = 329
+              Top = 365
               Width = 270
-              Height = 173
-              Align = alClient
+              Height = 137
+              Align = alBottom
               Caption = ' '
               TabOrder = 1
               object FaceTextureImage: TImage
                 Left = 8
-                Top = 24
+                Top = 56
                 Width = 256
                 Height = 64
                 Picture.Data = {
@@ -1934,10 +1917,78 @@ object Form1: TForm1
               end
               object Label10: TLabel
                 Left = 8
-                Top = 8
+                Top = 40
                 Width = 45
                 Height = 13
                 Caption = 'Texture: '
+              end
+              object Label9: TLabel
+                Left = 16
+                Top = 16
+                Width = 32
+                Height = 13
+                Caption = 'Color: '
+                FocusControl = FaceMaterialColorEdit
+              end
+              object FaceMaterialColorEdit: TEdit
+                Left = 48
+                Top = 16
+                Width = 81
+                Height = 21
+                ReadOnly = True
+                TabOrder = 0
+                Text = ' '
+              end
+            end
+            object Panel7: TPanel
+              Left = 0
+              Top = 217
+              Width = 270
+              Height = 148
+              Align = alClient
+              Caption = ' '
+              TabOrder = 2
+              object Panel8: TPanel
+                Left = 1
+                Top = 1
+                Width = 268
+                Height = 24
+                Align = alTop
+                BevelOuter = bvNone
+                Caption = ' '
+                TabOrder = 0
+                object Label11: TLabel
+                  Left = 8
+                  Top = 8
+                  Width = 50
+                  Height = 13
+                  Caption = 'Vertexes: '
+                end
+              end
+              object Panel9: TPanel
+                Left = 1
+                Top = 25
+                Width = 268
+                Height = 122
+                Align = alClient
+                BevelOuter = bvNone
+                BorderWidth = 2
+                Caption = ' '
+                TabOrder = 1
+                object VertStringGrid: TStringGrid
+                  Left = 2
+                  Top = 2
+                  Width = 264
+                  Height = 118
+                  Align = alClient
+                  BorderStyle = bsNone
+                  ColCount = 8
+                  DefaultColWidth = 32
+                  DefaultRowHeight = 14
+                  FixedCols = 0
+                  Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
+                  TabOrder = 0
+                end
               end
             end
           end
