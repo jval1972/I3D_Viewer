@@ -1001,7 +1001,8 @@ begin
   if not devparm then
     Exit;
 
-  OpenCorrectionForm(model, FacesListBox.ItemIndex);
+  if OpenCorrectionForm(model, FacesListBox.ItemIndex) then
+    NotifyFacesListBox;
 end;
 
 procedure TForm1.FacesListBoxDblClick(Sender: TObject);
@@ -1009,7 +1010,8 @@ begin
   if not devparm then
     Exit;
 
-  OpenCorrectionForm(model, FacesListBox.ItemIndex);
+  if OpenCorrectionForm(model, FacesListBox.ItemIndex) then
+    NotifyFacesListBox;
 end;
 
 end.
