@@ -157,6 +157,7 @@ type
     procedure DoNew;
     function DoLoadModel(const fname: string): boolean;
     procedure PopulateFacesListBox;
+    procedure SetFaceMaterialColorEdit(const c: LongWord);
     procedure NotifyFacesListBox;
     procedure SetFileName(const fname: string; const modelname: string);
     procedure UpdateStausbar;
@@ -504,6 +505,21 @@ begin
   BackgroundBMColor(c, False);
 end;
 
+procedure TForm1.SetFaceMaterialColorEdit(const c: LongWord);
+var
+  r, g, b: byte;
+begin
+  FaceMaterialColorEdit.Color := c;
+    r := GetRValue(c);
+    g := GetGValue(c);
+    b := GetBValue(c);
+  FaceMaterialColorEdit.Text := Format('(%d, %d, %d)', [r, g, b]);
+  if r < 128 then r := 255 else r := 0;
+  if g < 128 then g := 255 else g := 0;
+  if b < 128 then b := 255 else b := 0;
+  FaceMaterialColorEdit.Font.Color := RGB(r, g, b);
+end;
+
 procedure TForm1.NotifyFacesListBox;
 var
   face: O3DM_TFace_p;
@@ -519,8 +535,7 @@ begin
     FacetsxEdit.Text := '';
     FacetsyEdit.Text := '';
     FacetaEdit.Text := '';
-    FaceMaterialColorEdit.Color := RGB(255, 255, 255);
-    BackgroundBMColorClear(RGB(255, 255, 255));
+    SetFaceMaterialColorEdit(RGB(255, 255, 255));
     FaceTextureImage.Picture.Bitmap.Canvas.Draw(0, 0, cacheBM);
     Exit;
   end;
@@ -531,7 +546,7 @@ begin
   FacetsxEdit.Text := IntToStr(face.h.tsx);
   FacetsyEdit.Text := IntToStr(face.h.tsy);
   FacetaEdit.Text := IntToStr(face.h.ta);
-  FaceMaterialColorEdit.Color := I3DPalColorL(face.h.material.color);
+  SetFaceMaterialColorEdit(I3DPalColorL(face.h.material.color));
   idx := model.Bitmaps.IndexOf(face.h.material.texname);
   if idx >= 0 then
   begin
@@ -679,6 +694,7 @@ begin
   DoRenderGL;
 
   glneedsupdate := False;
+  needsrecalc := False;
 
   Done := True;
 end;
