@@ -154,6 +154,7 @@ type
     procedure MNOpenCorrectionsClick(Sender: TObject);
     procedure MNSaveCorrectionsClick(Sender: TObject);
     procedure EditFaceSpeedButtonClick(Sender: TObject);
+    procedure FacesListBoxDblClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -996,6 +997,14 @@ begin
 end;
 
 procedure TForm1.EditFaceSpeedButtonClick(Sender: TObject);
+begin
+  if not devparm then
+    Exit;
+
+  OpenCorrectionForm(model, FacesListBox.ItemIndex);
+end;
+
+procedure TForm1.FacesListBoxDblClick(Sender: TObject);
 begin
   if not devparm then
     Exit;

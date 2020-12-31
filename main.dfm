@@ -1583,6 +1583,7 @@ object Form1: TForm1
                 ItemHeight = 13
                 TabOrder = 0
                 OnClick = FacesListBoxClick
+                OnDblClick = FacesListBoxDblClick
               end
               object NumFaceVertexesEdit: TEdit
                 Left = 200
