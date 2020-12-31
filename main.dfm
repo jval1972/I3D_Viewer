@@ -1914,6 +1914,7 @@ object Form1: TForm1
                   FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
                   FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
                   FFFF}
+                PopupMenu = PopupMenu1
               end
               object Label10: TLabel
                 Left = 8
@@ -2128,5 +2129,13 @@ object Form1: TForm1
     Options = [ofOverwritePrompt, ofHideReadOnly, ofPathMustExist, ofEnableSizing]
     Left = 361
     Top = 153
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 420
+    Top = 233
+    object MNCopyTexture: TMenuItem
+      Caption = 'Copy'
+      OnClick = MNCopyTextureClick
+    end
   end
 end

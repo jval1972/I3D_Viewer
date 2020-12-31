@@ -31,8 +31,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, ExtCtrls, Buttons, Menus,
-  StdCtrls, AppEvnts, ExtDlgs, clipbrd, ToolWin, dglOpenGL, i3d_model, 
+  Dialogs, ComCtrls, ExtCtrls, Buttons, Menus, ClipBrd,
+  StdCtrls, AppEvnts, ExtDlgs, ToolWin, dglOpenGL, i3d_model, 
   i3d_filemenuhistory, Grids;
 
 type
@@ -113,6 +113,8 @@ type
     Label11: TLabel;
     Panel9: TPanel;
     VertStringGrid: TStringGrid;
+    PopupMenu1: TPopupMenu;
+    MNCopyTexture: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -142,6 +144,7 @@ type
     procedure Renderenviroment1Click(Sender: TObject);
     procedure ExportScreenshot1Click(Sender: TObject);
     procedure FacesListBoxClick(Sender: TObject);
+    procedure MNCopyTextureClick(Sender: TObject);
   private
     { Private declarations }
     ffilename: string;
@@ -953,6 +956,11 @@ end;
 procedure TForm1.FacesListBoxClick(Sender: TObject);
 begin
   NotifyFacesListBox;
+end;
+
+procedure TForm1.MNCopyTextureClick(Sender: TObject);
+begin
+  ClipBoard.Assign(FaceTextureImage.Picture.Bitmap);
 end;
 
 end.
