@@ -716,6 +716,7 @@ begin
   if closing then
     Exit;
 
+  Sleep(1);
   UpdateEnable;
 
   Done := False;
