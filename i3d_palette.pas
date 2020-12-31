@@ -41,6 +41,8 @@ function I3DPalColor3f(const idx: byte): i3dcolor3f_t;
 
 function I3DPalColorL(const idx: byte): LongWord;
 
+function I3DPalColorIndex(const c: LongWord): integer;
+
 implementation
 
 const
@@ -112,6 +114,41 @@ begin
     (RawPalette[3 * idx + 2] * 4 + 2) shl 16 +
     (RawPalette[3 * idx + 1] * 4 + 2) shl 8 +
     (RawPalette[3 * idx + 0] * 4 + 2);
-end;  
+end;
+
+function I3DPalColorIndex(const c: LongWord): integer;
+var
+  r, g, b: integer;
+  rc, gc, bc: integer;
+  dr, dg, db: integer;
+  i: integer;
+  dist: LongWord;
+  mindist: LongWord;
+begin
+  r := c and $FF;
+  g := (c shr 8) and $FF;
+  b := (c shr 16) and $FF;
+  Result := 0;
+  mindist := LongWord($ffffffff);
+  for i := 0 to 255 do
+  begin
+    rc := RawPalette[3 * i];
+    gc := RawPalette[3 * i + 1];
+    bc := RawPalette[3 * i + 2];
+    dr := r - rc;
+    dg := g - gc;
+    db := b - bc;
+    dist := dr * dr + dg * dg + db * db;
+    if dist < mindist then
+    begin
+      Result := i;
+      if dist = 0 then
+        Exit
+      else
+        mindist := dist;
+    end;
+  end;
+end;
+
 
 end.
