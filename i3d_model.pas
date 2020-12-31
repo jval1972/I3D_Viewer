@@ -55,6 +55,11 @@ type
     objsize: integer;
     textures: array[0..$7F] of LongWord;  // texid is shortint (-128..127)
     numtextures: integer;
+    headers: PO3DM_TFaceHeaderArray;
+    facevertexes: PO3DM_TFaceVertexArray;
+    numfacevertexes: integer;
+    vertexes: PO3DM_TVertexArray;
+    numvertexes: integer;
     fbitmaps: TStringList;
     fselected: integer;
     corrections: PI3dModelCorrectionArray;
@@ -171,10 +176,17 @@ begin
 
   GetMem(objfaces, obj.nFaces * SizeOf(O3DM_TFace));
 
+  GetMem(headers, obj.nFaces * SizeOf(O3DM_TFaceHeader));
+  numfacevertexes := 0;
+  numvertexes := 0;
   facecachepos := 0;
   for i := 0 to obj.nFaces - 1 do
   begin
     objfaces[i].h := _CacheRead(SizeOf(O3DM_TFaceHeader));
+    headers[i] := objfaces[i].h^;
+    objfaces[i].h := @headers[i];
+    numfacevertexes := numfacevertexes + headers[i].nVerts;
+    numvertexes := numvertexes + headers[i].nVerts;
     objfaces[i].verts := _CacheRead(objfaces[i].h.nVerts * SizeOf(O3DM_TFaceVertex));
     for j := 0 to objfaces[i].h.nVerts - 1 do
     begin
@@ -203,6 +215,28 @@ begin
     end
     else
       obj.materials[i].texid := -1;
+
+  GetMem(facevertexes, numfacevertexes * SizeOf(O3DM_TFaceVertex));
+  l := 0;
+  for i := 0 to obj.nFaces - 1 do
+  begin
+    for j := 0 to objfaces[i].h.nVerts - 1 do
+    begin
+      facevertexes[l] := objfaces[i].verts[j];
+      inc(l);
+    end;
+    objfaces[i].verts := @facevertexes[l - objfaces[i].h.nVerts];
+  end;
+
+  GetMem(vertexes, numvertexes * SizeOf(O3DM_TVertex));
+  l := 0;
+  for i := 0 to obj.nFaces - 1 do
+    for j := 0 to objfaces[i].h.nVerts - 1 do
+    begin
+      vertexes[l] := objfaces[i].verts[j].vert^;
+      objfaces[i].verts[j].vert := @vertexes[l];
+      inc(l);
+    end;
 
   Result := True;
 end;
@@ -282,6 +316,9 @@ var
 begin
   if obj <> nil then
   begin
+    FreeMem(headers, obj.nFaces * SizeOf(O3DM_TFaceHeader));
+    FreeMem(facevertexes, numfacevertexes * SizeOf(O3DM_TFaceVertex));
+    FreeMem(vertexes, numvertexes * SizeOf(O3DM_TVertex));
     FreeMem(objfaces, obj.nFaces * SizeOf(O3DM_TFace));
     for i := 0 to obj.nMaterials - 1 do
       if obj.materials[i].texture <> nil then
