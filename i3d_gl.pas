@@ -173,14 +173,27 @@ begin
     glBegin(GL_LINES);
       for i := -DREPEATS to DREPEATS do
       begin
+        if i = 0 then
+          glColor3f(1.0, 1.0, 0.0);
         glVertex3f((DREPEATS + 1) * DRUNIT, 0.0, i * DRUNIT);
         glVertex3f(-(DREPEATS + 1) * DRUNIT, 0.0, i * DRUNIT);
+        if i = 0 then
+          glColor3f(1.0, 1.0, 1.0);
       end;
+
       for i := -DREPEATS to DREPEATS do
       begin
+        if i = 0 then
+          glColor3f(1.0, 1.0, 0.0);
         glVertex3f(i * DRUNIT, 0.0, (DREPEATS + 1) * DRUNIT);
         glVertex3f(i * DRUNIT, 0.0, -(DREPEATS + 1) * DRUNIT);
+        if i = 0 then
+          glColor3f(1.0, 1.0, 1.0);
       end;
+
+      glColor3f(1.0, 1.0, 0.0);
+      glVertex3f(0.0, (DREPEATS + 1) * DRUNIT, 0.0);
+      glVertex3f(0.0, -(DREPEATS + 1) * DRUNIT, 0.0);
     glEnd;
 
     glEnable(GL_CULL_FACE);
