@@ -696,7 +696,11 @@ var
   i: integer;
   procedure _glvertex(const x, y, z: integer);
   begin
-    glVertex3f(x * scale, y * scale, z * scale);
+    glVertex3f(
+      (1.0 * x - obj.dcx) * obj.scx / DEF_I3D_SCALE * scale,
+      (1.0 * y - obj.dcy) * obj.scy / DEF_I3D_SCALE * scale,
+      -(1.0 * z - obj.dcz) * obj.scz / DEF_I3D_SCALE * scale
+    );
   end;
 begin
   if obj = nil then
