@@ -691,8 +691,8 @@ begin
     z := camera.z - 0.5;
     z := z / 0.99;
     camera.z := z + 0.5;
-    if camera.z < -20.0 then
-      camera.z := -20.0;
+    if camera.z < -40.0 then
+      camera.z := -40.0;
     glneedsupdate := True;
   end;
 end;
@@ -804,16 +804,16 @@ begin
   else
   begin
     camera.x := camera.x + (glpanx - X) / OpenGLPanel.Width * (camera.z - 1.0);/// OpenGLPanel.Width {* 2 * pi};
-    if camera.x < -6.0 then
-      camera.x := -6.0
-    else if camera.x > 6.0 then
-      camera.x := 6.0;
+    if camera.x < -10.0 then
+      camera.x := -10.0
+    else if camera.x > 10.0 then
+      camera.x := 10.0;
 
     camera.y := camera.y - (glpany - Y) / OpenGLPanel.Width * (camera.z - 1.0); // / OpenGLPanel.Height {* 2 * pi};
-    if camera.y < -6.0 then
-      camera.y := -6.0
-    else if camera.y > 6.0 then
-      camera.y := 6.0;
+    if camera.y < -10.0 then
+      camera.y := -10.0
+    else if camera.y > 10.0 then
+      camera.y := 10.0;
   end;
 
   glneedsupdate := True;

@@ -73,7 +73,7 @@ procedure ResetCamera;
 begin
   camera.x := 0.0;
   camera.y := -3.0;
-  camera.z := -6.0;
+  camera.z := -10.0;
   camera.ax := 0.0;
   camera.ay := 0.0;
   camera.az := 0.0;
@@ -160,7 +160,7 @@ end;
 
 procedure glRenderEnviroment;
 const
-  DRUNIT = 2.5;
+  DRUNIT = 5;
   DREPEATS = 10;
   DWORLD = DREPEATS + 1;
 var
