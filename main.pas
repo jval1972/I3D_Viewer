@@ -121,6 +121,13 @@ type
     MNSaveCorrections: TMenuItem;
     N1: TMenuItem;
     EditFaceSpeedButton: TSpeedButton;
+    Panel10: TPanel;
+    Label13: TLabel;
+    xOriginEdit: TEdit;
+    yOriginEdit: TEdit;
+    Label12: TLabel;
+    zOriginEdit: TEdit;
+    Label14: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure NewButton1Click(Sender: TObject);
@@ -176,6 +183,7 @@ type
     procedure DoNew;
     function DoLoadModel(const fname: string): boolean;
     procedure PopulateFacesListBox;
+    procedure PopulateObjectGeneralInfo;
     procedure SetFaceMaterialColorEdit(const c: LongWord);
     procedure MakeGrid;
     procedure NotifyFacesListBox;
@@ -319,6 +327,7 @@ begin
     if Pos('-', ParamStr(1)) = 0 then
       if DoLoadModel(ParamStr(1)) then
       begin
+        PopulateObjectGeneralInfo;
         PopulateFacesListBox;
         doCreate := False;
       end;
@@ -501,6 +510,13 @@ begin
   NotifyFacesListBox;
 end;
 
+procedure TForm1.PopulateObjectGeneralInfo;
+begin
+  xOriginEdit.Text := IntToStr(model.dcx);
+  yOriginEdit.Text := IntToStr(model.dcy);
+  zOriginEdit.Text := IntToStr(model.dcz);
+end;
+
 procedure TForm1.BackgroundBMColor(const c: LongWord; const solid: boolean);
 var
   r, g, b: byte;
@@ -668,6 +684,7 @@ begin
   if OpenDialog1.Execute then
   begin
     DoLoadModel(OpenDialog1.FileName);
+    PopulateObjectGeneralInfo;
     PopulateFacesListBox;
     ResetCamera;
   end;
@@ -863,6 +880,7 @@ begin
     Exit;
 
   DoLoadModel(fname);
+  PopulateObjectGeneralInfo;
   PopulateFacesListBox;
   ResetCamera;
 end;

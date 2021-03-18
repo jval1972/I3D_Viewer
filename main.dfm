@@ -1496,7 +1496,7 @@ object Form1: TForm1
             TabOrder = 0
             object Panel5: TPanel
               Left = 0
-              Top = 0
+              Top = 49
               Width = 270
               Height = 217
               Align = alTop
@@ -1953,9 +1953,9 @@ object Form1: TForm1
             end
             object Panel7: TPanel
               Left = 0
-              Top = 217
+              Top = 266
               Width = 270
-              Height = 149
+              Height = 100
               Align = alClient
               Caption = ' '
               TabOrder = 2
@@ -1980,7 +1980,7 @@ object Form1: TForm1
                 Left = 1
                 Top = 25
                 Width = 268
-                Height = 123
+                Height = 74
                 Align = alClient
                 BevelOuter = bvNone
                 BorderWidth = 2
@@ -1990,7 +1990,7 @@ object Form1: TForm1
                   Left = 2
                   Top = 2
                   Width = 264
-                  Height = 119
+                  Height = 70
                   Align = alClient
                   BorderStyle = bsNone
                   ColCount = 8
@@ -2009,6 +2009,66 @@ object Form1: TForm1
                     32
                     32)
                 end
+              end
+            end
+            object Panel10: TPanel
+              Left = 0
+              Top = 0
+              Width = 270
+              Height = 49
+              Align = alTop
+              Caption = ' '
+              TabOrder = 3
+              object Label13: TLabel
+                Left = 8
+                Top = 12
+                Width = 41
+                Height = 13
+                Caption = 'xOrigin: '
+                FocusControl = xOriginEdit
+              end
+              object Label12: TLabel
+                Left = 96
+                Top = 12
+                Width = 41
+                Height = 13
+                Caption = 'yOrigin: '
+                FocusControl = yOriginEdit
+              end
+              object Label14: TLabel
+                Left = 184
+                Top = 12
+                Width = 40
+                Height = 13
+                Caption = 'zOrigin: '
+                FocusControl = zOriginEdit
+              end
+              object xOriginEdit: TEdit
+                Left = 48
+                Top = 12
+                Width = 38
+                Height = 21
+                ReadOnly = True
+                TabOrder = 0
+                Text = ' '
+              end
+              object yOriginEdit: TEdit
+                Left = 136
+                Top = 12
+                Width = 38
+                Height = 21
+                ReadOnly = True
+                TabOrder = 1
+                Text = ' '
+              end
+              object zOriginEdit: TEdit
+                Left = 224
+                Top = 12
+                Width = 38
+                Height = 21
+                ReadOnly = True
+                TabOrder = 2
+                Text = ' '
               end
             end
           end

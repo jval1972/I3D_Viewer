@@ -88,6 +88,9 @@ type
     procedure LoadCorrectionsFromFile(const fname: string);
     procedure UVtoGL(const tx, tv: integer; var du, dv: single);
     procedure GLtoUV(const du, dv: single; var tx, tv: integer);
+    function dcx: integer;
+    function dcy: integer;
+    function dcz: integer;
     property faces[Index: integer]: O3DM_TFace_p read GetFace;
     property numfaces: integer read GetNumFaces;
     property Bitmaps: TStringList read fbitmaps;
@@ -592,6 +595,30 @@ procedure TI3DModel.GLtoUV(const du, dv: single; var tx, tv: integer);
 begin
   tx := -Round(du * UVGLCONST);
   tv := Round(dv * UVGLCONST);
+end;
+
+function TI3DModel.dcx: integer;
+begin
+  if obj = nil then
+    Result := 0
+  else
+    Result := obj.dcx;
+end;
+
+function TI3DModel.dcy: integer;
+begin
+  if obj = nil then
+    Result := 0
+  else
+    Result := obj.dcy;
+end;
+
+function TI3DModel.dcz: integer;
+begin
+  if obj = nil then
+    Result := 0
+  else
+    Result := obj.dcz;
 end;
 
 function TI3DModel.RenderGL(const scale: single): integer;
