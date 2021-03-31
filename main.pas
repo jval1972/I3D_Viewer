@@ -708,8 +708,8 @@ begin
     z := camera.z - 0.5;
     z := z / 0.99;
     camera.z := z + 0.5;
-    if camera.z < -40.0 then
-      camera.z := -40.0;
+    if camera.z < -64.0 then
+      camera.z := -64.0;
     glneedsupdate := True;
   end;
 end;
