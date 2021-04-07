@@ -664,7 +664,7 @@ begin
     Handle,
     PChar(Format('%s'#13#10 +
     'Version ' + I_VersionBuilt + #13#10 +
-    'Copyright (c) 2020, jvalavanis@gmail.com'#13#10 +
+    'Copyright (c) 2020-2021, jvalavanis@gmail.com'#13#10 +
     #13#10'Speed Haste Model Viewer.'#13#10,
         [rsTitle])),
     PChar(rsTitle),
