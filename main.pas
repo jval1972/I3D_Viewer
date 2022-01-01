@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 //
 //  I3D_Viewer - Model Viewer for Speed Haste models
-//  Copyright (C) 2020-2021 by Jim Valavanis
+//  Copyright (C) 2020-2022 by Jim Valavanis
 //
 //  This program is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ComCtrls, ExtCtrls, Buttons, Menus, ClipBrd,
-  StdCtrls, AppEvnts, ExtDlgs, ToolWin, dglOpenGL, i3d_model, 
+  StdCtrls, AppEvnts, ExtDlgs, ToolWin, dglOpenGL, i3d_model,
   i3d_filemenuhistory, Grids;
 
 type
@@ -246,7 +246,7 @@ begin
   FaceTextureImage.Picture.Bitmap.PixelFormat := pf32bit;
 
   MakeGrid;
-  
+
   ffilename := '';
   fjclmodelname := '';
 
@@ -859,7 +859,7 @@ begin
   if Odd(timercnt) then
     model.selected := FacesListBox.ItemIndex
   else
-    model.selected := -1; 
+    model.selected := -1;
   glneedsupdate := True;
 end;
 
